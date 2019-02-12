@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="643.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ReportsController">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" text="Reports">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="ReportConsultantPicker" layoutX="124.0" layoutY="87.0" onAction="#ReportConsultantPickerHandler" prefWidth="150.0" />
+      <DatePicker fx:id="ReportDatePicker" layoutX="412.0" layoutY="87.0" onAction="#ReportDatePickerHandler" />
+      <Label layoutX="14.0" layoutY="61.0" text="List Appointment by:" />
+      <Label layoutX="55.0" layoutY="91.0" text="Consultant:" />
+      <Label layoutX="373.0" layoutY="91.0" text="Date:" />
+      <TableView fx:id="ReportTable" layoutX="24.0" layoutY="132.0" prefHeight="200.0" prefWidth="561.0">
+        <columns>
+          <TableColumn fx:id="ReportApptCol" prefWidth="107.0" text="Appointment" />
+          <TableColumn fx:id="ReportStartCol" prefWidth="75.5" text="Start Time" />
+            <TableColumn fx:id="ReportEndCol" prefWidth="68.5" text="End Time" />
+            <TableColumn fx:id="ReportContactCol" prefWidth="78.5" text="Contact" />
+            <TableColumn fx:id="ReportCustomerCol" prefWidth="72.5" text="Customer" />
+            <TableColumn fx:id="ReportDescriptionCol" prefWidth="156.0" text="Description" />
+        </columns>
+      </TableView>
+      <TableView fx:id="ReportApptCountTable" layoutX="24.0" layoutY="391.0" prefHeight="200.0" prefWidth="391.0">
+        <columns>
+          <TableColumn fx:id="ReportMonthCol" prefWidth="75.0" text="Month" />
+          <TableColumn fx:id="ReportApptTypeCol" prefWidth="208.5" text="Appointment Type" />
+            <TableColumn fx:id="ReportSumCol" prefWidth="105.0" text="Sum" />
+        </columns>
+      </TableView>
+      <Button fx:id="ReportCancel" layoutX="533.0" layoutY="569.0" mnemonicParsing="false" onAction="#ReportCancelHandler" text="Cancel" />
+      <Label layoutX="24.0" layoutY="356.0" text="Appointment Types By Month:" />
+      <Label layoutX="305.0" layoutY="91.0" text="Or By:" />
+   </children>
+</AnchorPane>
