@@ -16,8 +16,8 @@
       <Button fx:id="ApptEditCancel" layoutX="238.0" layoutY="522.0" mnemonicParsing="false" onAction="#ApptEditCancelHandler" text="Cancel" />
       <TableView fx:id="ApptEditCustTable" layoutX="10.0" layoutY="63.0" prefHeight="194.0" prefWidth="297.0">
         <columns>
-          <TableColumn fx:id="ApptEditCol" prefWidth="178.5" text="Customers" />
-            <TableColumn fx:id="ApptEditCustIDCol" prefWidth="117.0" text="CustomerID" />
+          <TableColumn fx:id="ApptEditCol" editable="false" prefWidth="178.5" text="Customers" />
+            <TableColumn fx:id="ApptEditCustIDCol" editable="false" prefWidth="117.0" text="CustomerID" />
         </columns>
       </TableView>
       <DatePicker fx:id="ApptEditDatePicker" layoutX="145.0" layoutY="407.0" onAction="#ApptEditDatePickerHandler" prefHeight="25.0" prefWidth="149.0" />

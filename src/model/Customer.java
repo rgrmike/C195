@@ -16,6 +16,7 @@ public class Customer {
     private Integer addressId;
     private String address;
     private String address2;
+    private Integer cityId;
     private String city;
     private String country;
     private String postalCode;
@@ -24,12 +25,13 @@ public class Customer {
     public Customer (){
     }
     
-    public Customer (Integer customerID, String customerName, Integer addressId, String address, String address2, String city, String country, String postalCode, String phone){
+    public Customer (Integer customerID, String customerName, Integer addressId, String address, String address2, Integer cityId, String city, String country, String postalCode, String phone){
         this.customerId = customerID;
         this.customerName = customerName;
         this.addressId = addressId;
         this.address = address;
         this.address2 = address2;
+        this.cityId = cityId;
         this.city = city;
         this.country = country;
         this.postalCode = postalCode;
@@ -67,14 +69,37 @@ public class Customer {
     public String getAddress() {
         return address;
     }
+    
+    public void setAddress(String address){
+        this.address = address;
+    }
+    
+    public String getAddress2() {
+        return address2;
+    }
+    
+    public void setAddress2(String address2){
+        this.address2 = address2;
+    }
+    
+    public Integer getCityId(){
+        return cityId;
+    }
+    
+    public void setCityId(Integer cityId){
+        this.cityId = cityId;
+    }
+    
 
     public String getPostalCode() {
         return postalCode;
     }
-
-    public String getAddress2() {
-        return address2;
+    
+    public void setPostalCode(String postalCode){
+        this.postalCode = postalCode;
     }
+
+    
 
     public String getCity() {
         return city;

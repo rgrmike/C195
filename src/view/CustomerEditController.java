@@ -14,6 +14,7 @@ import model.DBConnection;
 import model.Query;
 import model.Customer;
 import model.Repo;
+import model.City;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.util.Optional;
@@ -57,13 +58,17 @@ public class CustomerEditController implements Initializable {
     @FXML
     private TextField CustomerEditFieldPhone;
     @FXML
-    private ComboBox<String> CustomerEditComboCity;
-    @FXML
     private TableView<Customer> CustomerEditCustomerTable;
     @FXML
     private TableColumn<Customer, Integer> CustomerEditCustIDCol;
     @FXML
     private TableColumn<Customer, String> CustomerEditCustNameCol;
+    @FXML
+    private TableView<City> CustomerEditCityTable;
+    @FXML
+    private TableColumn<City, Integer> CustomerEditCityIDCol;
+    @FXML
+    private TableColumn<City, String> CustomerEditCityCol;
     @FXML
     private Button CustomerEditEditButton;
     @FXML
@@ -74,9 +79,11 @@ public class CustomerEditController implements Initializable {
     private Button CustomerEditCancelButton;
     
     ObservableList<Customer> custList = FXCollections.observableArrayList();
-    ObservableList<String>cityList = FXCollections.observableArrayList();
+    ObservableList<City>cityList = FXCollections.observableArrayList();
     private Repo currentRepo;
     private boolean editMe = false;
+    
+    
     
     /**
      * Initializes the controller class.
@@ -87,7 +94,7 @@ public class CustomerEditController implements Initializable {
         // Populate custList
         try {
             DBConnection.makeConnection();
-            String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.addressID JOIN country t ON y.countryId = t.countryId";
+            String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, y.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.addressID JOIN country t ON y.countryId = t.countryId";
             Query.makeQuery(sqlStatement);
             ResultSet result = Query.getResult();
             System.out.println(result);
@@ -97,20 +104,23 @@ public class CustomerEditController implements Initializable {
                 Integer dbAddressId = result.getInt("a.addressId");
                 String dbAddress = result.getString("a.address");
                 String dbAddress2 = result.getString("a.address2");
+                Integer dbCityId = result.getInt("y.cityId");
                 String dbCity = result.getString("y.city");
                 String dbCountry = result.getString("t.country");
                 String dbPost = result.getString("a.postalCode");
                 String dbPhone = result.getString("a.phone");
-                Customer customerEdit = new Customer(dbCustID, dbCustName, dbAddressId, dbAddress, dbAddress2, dbCity, dbCountry, dbPost, dbPhone);
+                Customer customerEdit = new Customer(dbCustID, dbCustName, dbAddressId, dbAddress, dbAddress2, dbCityId, dbCity, dbCountry, dbPost, dbPhone);
                 custList.add(customerEdit);               
             }
-            String sqltwo = "SELECT y.city FROM city y";
+            String sqltwo = "SELECT y.cityId, y.city FROM city y";
             Query.makeQuery(sqltwo);
             ResultSet resultTwo = Query.getResult();
             System.out.println(resultTwo);
             while(resultTwo.next()){
+                Integer dbPopCityId = resultTwo.getInt("y.cityId");
                 String dbPopCity = resultTwo.getString("y.city");
-                cityList.add(dbPopCity);                
+                City city = new City(dbPopCityId, dbPopCity);
+                cityList.add(city);                
             }
             
             
@@ -125,9 +135,9 @@ public class CustomerEditController implements Initializable {
         CustomerEditCustNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
         CustomerEditCustIDCol.setCellValueFactory(new PropertyValueFactory<>("customerId"));
         CustomerEditCustomerTable.getItems().setAll(custList);
-        CustomerEditComboCity.setItems(cityList);
-        CustomerEditComboCity.getSelectionModel().select(0);
-        
+        CustomerEditCityIDCol.setCellValueFactory(new PropertyValueFactory<>("cityId"));
+        CustomerEditCityCol.setCellValueFactory(new PropertyValueFactory<>("city"));
+        CustomerEditCityTable.getItems().setAll(cityList);
     }
 
     @FXML
@@ -160,7 +170,8 @@ public class CustomerEditController implements Initializable {
         CustomerEditFieldName.setText(selCustomer.getCustomerName());
         CustomerEditFieldAddr.setText(selCustomer.getAddress());
         CustomerEditFieldAddr2.setText(selCustomer.getAddress2());
-        CustomerEditComboCity.setValue(selCustomer.getCity());
+        //setTablehilight row
+        CustomerEditCityTable.getSelectionModel().select(selCustomer.getCityId());
         CustomerEditFieldZip.setText(selCustomer.getPostalCode());
         CustomerEditFieldPhone.setText(selCustomer.getPhone());
         editMe = true;
@@ -175,9 +186,33 @@ public class CustomerEditController implements Initializable {
     
     @FXML
     private void CustomerEditSaveButtonHandler(ActionEvent event) {
+        Integer nextCustomerId;
         //Save fields to db
         //check if this is a new record or not - grab the next customer ID from the database
-        
+        if (editMe == true){
+            
+        } else {
+            try {
+                DBConnection.makeConnection();
+                //Create Statement object
+                String sqlStatementOne = "SELECT MAX(customerId) FROM customer ";
+                Query.makeQuery(sqlStatementOne);
+                ResultSet resultOne = Query.getResult();
+                while(resultOne.next()){
+                    nextCustomerId = (resultOne.getInt("customerId") + 1);
+                }
+                //need to make add cityID
+                //one statement for customer and one for address
+                String sqlStatementTwo ="";
+                Query.makeQuery(sqlStatementTwo);
+                DBConnection.closeConnection();
+            } catch (SQLException sqe){
+            //Show SQL connection messages
+            System.out.println("Error: " + sqe.getMessage());
+            } catch (Exception ex) {
+                System.out.println("Delete Code Barfed " + ex.getMessage());
+            }      
+        }
     }
 
     @FXML
@@ -221,9 +256,6 @@ public class CustomerEditController implements Initializable {
 
     
 
-    @FXML
-    private void CustomerEditComboCityHandler(ActionEvent event) {
-    }
      
     @FXML
     private void CustomerEditCancelButtonHandler(ActionEvent event) throws IOException {
