@@ -245,7 +245,7 @@ public class CalendarController implements Initializable {
             alert.setTitle("Confirm Deletion");
             alert.setHeaderText("Are you sure you want to delete " + selApt.getAppointmentTitle());
             Optional<ButtonType> x = alert.showAndWait();
-        //if the OK button is clicked then go ahead and remove the part
+        //if the OK button is clicked then go ahead and remove the appt
         if (x.get() == ButtonType.OK){
             try{
                 DBConnection.makeConnection();
