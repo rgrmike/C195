@@ -23,7 +23,6 @@
       <TextField fx:id="CustomerEditFieldAddr2" layoutX="421.0" layoutY="172.0" onAction="#CustomerEditFieldAddr2Handler" />
       <TextField fx:id="CustomerEditFieldZip" layoutX="421.0" layoutY="272.0" onAction="#CustomerEditFieldZipHandler" />
       <TextField fx:id="CustomerEditFieldPhone" layoutX="421.0" layoutY="306.0" onAction="#CustomerEditFieldPhoneHandler" />
-      <Button fx:id="CustomerEditAddButton" layoutX="333.0" layoutY="371.0" mnemonicParsing="false" onAction="#CustomerEditAddButtonHandler" text=" Add" />
       <Button fx:id="CustomerEditEditButton" layoutX="385.0" layoutY="371.0" mnemonicParsing="false" onAction="#CustomerEditEditButtonHandler" text="Edit" />
       <Button fx:id="CustomerEditRemoveButton" layoutX="430.0" layoutY="371.0" mnemonicParsing="false" onAction="#CustomerEditRemoveButtonHandler" text="Remove" />
       <Button fx:id="CustomerEditSaveButton" layoutX="501.0" layoutY="371.0" mnemonicParsing="false" onAction="#CustomerEditSaveButtonHandler" text="Save" />

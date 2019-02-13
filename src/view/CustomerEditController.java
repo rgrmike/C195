@@ -57,15 +57,13 @@ public class CustomerEditController implements Initializable {
     @FXML
     private TextField CustomerEditFieldPhone;
     @FXML
-    private ComboBox<?> CustomerEditComboCity;
+    private ComboBox<String> CustomerEditComboCity;
     @FXML
     private TableView<Customer> CustomerEditCustomerTable;
     @FXML
     private TableColumn<Customer, Integer> CustomerEditCustIDCol;
     @FXML
     private TableColumn<Customer, String> CustomerEditCustNameCol;
-    @FXML
-    private Button CustomerEditAddButton;
     @FXML
     private Button CustomerEditEditButton;
     @FXML
@@ -104,6 +102,14 @@ public class CustomerEditController implements Initializable {
                 Customer customerEdit = new Customer(dbCustID, dbCustName, dbAddress, dbAddress2, dbCity, dbCountry, dbPost, dbPhone);
                 custList.add(customerEdit);               
             }
+            String sqltwo = "SELECT y.city FROM city y";
+            Query.makeQuery(sqltwo);
+            ResultSet resultTwo = Query.getResult();
+            System.out.println(resultTwo);
+            while(resultTwo.next()){
+                String dbPopCity = resultTwo.getString("y.city");
+                cityList.add(dbPopCity);                
+            }
             
             
             DBConnection.closeConnection();
@@ -117,6 +123,7 @@ public class CustomerEditController implements Initializable {
         CustomerEditCustNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
         CustomerEditCustIDCol.setCellValueFactory(new PropertyValueFactory<>("customerId"));
         CustomerEditCustomerTable.getItems().setAll(custList);
+        CustomerEditComboCity.setItems(cityList);
         
     }
 
@@ -126,10 +133,6 @@ public class CustomerEditController implements Initializable {
 
     @FXML
     private void CustomerEditFieldNameHandler(ActionEvent event) {
-    }
-
-    @FXML
-    private void CustomerEditFieldAddrHandler(ActionEvent event) {
     }
 
     @FXML
