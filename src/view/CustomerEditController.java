@@ -170,8 +170,7 @@ public class CustomerEditController implements Initializable {
         CustomerEditFieldName.setText(selCustomer.getCustomerName());
         CustomerEditFieldAddr.setText(selCustomer.getAddress());
         CustomerEditFieldAddr2.setText(selCustomer.getAddress2());
-        //setTablehilight row
-        CustomerEditCityTable.getSelectionModel().select(selCustomer.getCityId());
+        CustomerEditCityTable.getSelectionModel().select(selCustomer.getCityId() - 1);
         CustomerEditFieldZip.setText(selCustomer.getPostalCode());
         CustomerEditFieldPhone.setText(selCustomer.getPhone());
         editMe = true;
