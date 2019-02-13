@@ -42,6 +42,7 @@ import model.DBConnection;
 import model.Query;
 import model.Customer;
 import model.Appt;
+import model.Repo;
  
 
 /**
@@ -94,8 +95,7 @@ public class CalendarController implements Initializable {
     ZoneId locationHolder;
     ZoneId myLocationZone = ZoneId.systemDefault();
     //used to pass which button is pressed eidit or new
-    public static boolean isEdit = false;
-    public static Appt selEditApt;
+    private Repo currentRepo;
     
     /**
      * Initializes the controller class.
@@ -274,10 +274,10 @@ public class CalendarController implements Initializable {
     @FXML
     private void CalendarEditButtonHandler(ActionEvent event) throws IOException {
     
-    selEditApt = CalendarTable.getSelectionModel().getSelectedItem();
-    
+    Appt selEditApt = CalendarTable.getSelectionModel().getSelectedItem();
+    currentRepo.setrepoSelectEditApt(selEditApt);
     if (selEditApt != null) {
-        isEdit = true;
+        currentRepo.setrepoIsEdit(true);
         Stage stage; 
         Parent root;
         stage=(Stage) CalendarEditButton.getScene().getWindow();
@@ -300,7 +300,7 @@ public class CalendarController implements Initializable {
     private void CalendarNewButtonHandler(ActionEvent event) throws IOException {
         //make sure we tell the appt edit form that we are making a new appt and not editing an existing one
         //Each time the new button is executed it sets false
-        isEdit = false;
+        currentRepo.setrepoIsEdit(true);
         //open the calendar page
         //get reference to the button's stage         
         Stage stage; 

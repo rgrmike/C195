@@ -41,6 +41,7 @@ import model.Appt;
 import model.Customer;
 import model.DBConnection;
 import model.Query;
+import model.Repo;
 
 /**
  * FXML Controller class
@@ -74,6 +75,7 @@ public class ApptEditController implements Initializable {
     @FXML
     private ComboBox<String> ApptEditContact;
     
+    private Repo currentRepo;
     ObservableList<Customer> custList = FXCollections.observableArrayList();
     ObservableList<String>apptTypeList = FXCollections.observableArrayList();
     ObservableList<String>apptLocationList = FXCollections.observableArrayList();
@@ -85,11 +87,6 @@ public class ApptEditController implements Initializable {
     ZoneId saveLocationZone = ZoneId.systemDefault();
     Integer editApptId;
     
-    
-    
-    
-    
-
     /**
      * Initializes the controller class.
      */
@@ -100,8 +97,7 @@ public class ApptEditController implements Initializable {
         //populate the combo boxes
         apptTypeList.addAll("First Meeting", "First Consultation", "Follow-up");
         ApptEditTypeCombo.setItems(apptTypeList);
-        //later - populate using the user class
-        apptUserList.addAll ("user1", "user2");
+        //Remove this later *** apptUserList.addAll ("user1", "user2");
         ApptEditContact.setItems(apptUserList);
         
         ApptEditTypeCombo.getSelectionModel().select(0);
@@ -115,9 +111,9 @@ public class ApptEditController implements Initializable {
         ApptEditEnd.setItems(apptEndList);
         ApptEditEnd.getSelectionModel().select(0);
         
-        if(CalendarController.isEdit==true){
+        if(currentRepo.getrepoIsEdit()==true){
             //if isEdit is true then grab the selected appointment and populate the list
-            Appt transfer = view.CalendarController.selEditApt;
+            Appt transfer = currentRepo.getRepoSelectEditApt();
             editApptId = transfer.getAppointmentID();
             //customer ID is off by 1 so we are subtracting one to get it to show up correctly
             ApptEditCustTable.getSelectionModel().select((transfer.getCustomer().getCustomerId()-1));
@@ -151,6 +147,15 @@ public class ApptEditController implements Initializable {
                 //debug message
                 System.out.println("Created appt " + cust.getCustomerName());
                 custList.add(cust);               
+            }
+            
+            String sqltwo = "SELECT userName from user";
+            Query.makeQuery(sqltwo);
+            ResultSet resulttwo = Query.getResult();
+            while(resulttwo.next()){
+                String dbUsrName = result.getString("userName");
+                apptUserList.add(dbUsrName);
+                
             }
             DBConnection.closeConnection();
         } catch (SQLException sqe){
@@ -204,11 +209,11 @@ public class ApptEditController implements Initializable {
         //convert the apptID to a string for and update
         String dbApptId = editApptId.toString();
         
-        if(CalendarController.isEdit==true){
+        if(currentRepo.getrepoIsEdit()==true){
         //if isEdit is true then we are updating an existing record
         try {
             DBConnection.makeConnection();
-            String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = " + dbUpdateTitle + ", description = " + dbUpdateDesc + ", location = " + dbUpdateLocation + ", contact = "+ dbUpdateContact +",start = "+ dbUStart +", end = "+ dbUEnd +", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = admin WERE appointmentId = " + dbApptId;
+            String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = " + dbUpdateTitle + ", description = " + dbUpdateDesc + ", location = " + dbUpdateLocation + ", contact = "+ dbUpdateContact +",start = "+ dbUStart +", end = "+ dbUEnd +", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy =" + currentRepo.getrepoUserName() + " WERE appointmentId = " + dbApptId;
             Query.makeQuery(sqlStatement);
             ResultSet result = Query.getResult();
             System.out.println(result);
@@ -233,7 +238,7 @@ public class ApptEditController implements Initializable {
                 //increment the appointmentId by 1
                 newMaxApptId = dbMaxApptId +1;
                 //replace admin with user from user class
-                String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", " + dbUpdateTitle + ", " + dbUpdateDesc + ", " + dbUpdateLocation + ", " + dbUpdateContact + ", " + dbUStart + ", " + dbUEnd + ", CURRENT_TIMESTAMP," + " admin"+", CURRENT_TIMESTAMP," + "admin"+")";
+                String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", " + dbUpdateTitle + ", " + dbUpdateDesc + ", " + dbUpdateLocation + ", " + dbUpdateContact + ", " + dbUStart + ", " + dbUEnd + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
                 Query.makeQuery(sqlStatementtwo);
                 ResultSet resulttwo = Query.getResult();
                 }
@@ -295,6 +300,10 @@ public class ApptEditController implements Initializable {
 
     @FXML
     private void ApptEditLocationHandler(ActionEvent event) {
+    }
+
+    @FXML
+    private void ApptEditContactHandler(ActionEvent event) {
     }
     
 }

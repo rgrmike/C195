@@ -24,7 +24,7 @@ public class C195Mand191 extends Application {
         //Parent root = FXMLLoader.load(getClass().getResource("/view/UserLogin.fxml"));
         
         //for testing pages
-        Parent root = FXMLLoader.load(getClass().getResource("/view/Calendar.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/view/UserLogin.fxml"));
         Scene scene = new Scene(root);
         
         stage.setScene(scene);

@@ -25,6 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import model.DBConnection;
 import model.Query;
+import model.Repo;
 
 /**
  * FXML Controller class
@@ -37,7 +38,8 @@ public class UserLoginController implements Initializable {
     private String dbUserPw = null;
     private String localUserPW = null;
     private String localUserName = null;
-    private Locale myLocale = Locale.getDefault();
+    Repo repo = new Repo();
+    private final Locale myLocale = Locale.getDefault();
     @FXML
     private TextField UserLoginUserNameField;
     @FXML
@@ -82,14 +84,17 @@ public class UserLoginController implements Initializable {
             //Get all records from result set object
             while(result.next()){
             dbUserID = result.getInt("userID");
+            repo.setrepoUserId(dbUserID);
             //Debug - Print UserID
             System.out.print(dbUserID + ", ");
             dbUserName = result.getString("userName");
+            repo.setrepoUserName(dbUserName);
             //Debug - Print UserID
             System.out.print(dbUserName + ", ");
             dbUserPw = result.getString("password");
             //Debug - Print UserID
             System.out.println(dbUserPw);
+            
         }
         
         DBConnection.closeConnection();
