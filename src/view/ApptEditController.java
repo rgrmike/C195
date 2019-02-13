@@ -130,7 +130,7 @@ public class ApptEditController implements Initializable {
         // Populate custList
         try {
             DBConnection.makeConnection();
-            String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.addressID JOIN country t ON y.countryId = t.countryId";
+            String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, y.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.addressID JOIN country t ON y.countryId = t.countryId";
             Query.makeQuery(sqlStatement);
             ResultSet result = Query.getResult();
             System.out.println(result);
@@ -140,11 +140,12 @@ public class ApptEditController implements Initializable {
                 Integer dbAddressId = result.getInt("a.addressId");
                 String dbAddress = result.getString("a.address");
                 String dbAddress2 = result.getString("a.address2");
+                Integer dbCityId = result.getInt("y.cityId");
                 String dbCity = result.getString("y.city");
                 String dbCountry = result.getString("t.country");
                 String dbPost = result.getString("a.postalCode");
                 String dbPhone = result.getString("a.phone");
-                Customer cust = new Customer(dbCustID, dbCustName, dbAddressId, dbAddress, dbAddress2, dbCity, dbCountry, dbPost, dbPhone);
+                Customer cust = new Customer(dbCustID, dbCustName, dbAddressId, dbAddress, dbAddress2, dbCityId, dbCity, dbCountry, dbPost, dbPhone);
                 //debug message
                 System.out.println("Created appt " + cust.getCustomerName());
                 custList.add(cust);               
