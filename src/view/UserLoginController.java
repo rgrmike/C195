@@ -171,5 +171,13 @@ public class UserLoginController implements Initializable {
         }
     }
     
+    private void Remind(){
+        
+    }
+    
+    private void LogToFile(){
+        
+    }
+    
     
 }

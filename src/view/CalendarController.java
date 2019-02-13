@@ -90,7 +90,7 @@ public class CalendarController implements Initializable {
     //intitalize the observable list as an array list - otherwise populating the list with appt will barf
     
     ObservableList<Appt> appointmentList = FXCollections.observableArrayList();
-   
+    
     String qContents = null;
     ZoneId locationHolder;
     ZoneId myLocationZone = ZoneId.systemDefault();
@@ -342,5 +342,9 @@ public class CalendarController implements Initializable {
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
+    }
+    
+    private void populateCustomer(){
+        
     }
 }

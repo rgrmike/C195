@@ -12,10 +12,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import model.DBConnection;
 import model.Query;
+import model.Customer;
+import model.Repo;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +34,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 /**
@@ -54,13 +59,11 @@ public class CustomerEditController implements Initializable {
     @FXML
     private ComboBox<?> CustomerEditComboCity;
     @FXML
-    private Label CustomerEditLabelCountry;
+    private TableView<Customer> CustomerEditCustomerTable;
     @FXML
-    private TableView<?> CustomerEditCustomerTable;
+    private TableColumn<Customer, Integer> CustomerEditCustIDCol;
     @FXML
-    private TableColumn<?, ?> CustomerEditCustIDCol;
-    @FXML
-    private TableColumn<?, ?> CustomerEditCustNameCol;
+    private TableColumn<Customer, String> CustomerEditCustNameCol;
     @FXML
     private Button CustomerEditAddButton;
     @FXML
@@ -71,45 +74,51 @@ public class CustomerEditController implements Initializable {
     private Button CustomerEditSaveButton;
     @FXML
     private Button CustomerEditCancelButton;
-
+    
+    ObservableList<Customer> custList = FXCollections.observableArrayList();
+    ObservableList<String>cityList = FXCollections.observableArrayList();
+    private Repo currentRepo;
+    
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        
+        // Populate custList
         try {
-        DBConnection.makeConnection();
-        //Create Statement object
-        //Statement stmt = conn.createStatement();
+            DBConnection.makeConnection();
+            String sqlStatement = "SELECT c.customerId, c.customerName, a.address, a.address2, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.addressID JOIN country t ON y.countryId = t.countryId";
+            Query.makeQuery(sqlStatement);
+            ResultSet result = Query.getResult();
+            System.out.println(result);
+            while(result.next()){
+                Integer dbCustID = result.getInt("c.customerId");
+                String dbCustName = result.getString("c.customerName");
+                String dbAddress = result.getString("a.address");
+                String dbAddress2 = result.getString("a.address2");
+                String dbCity = result.getString("y.city");
+                String dbCountry = result.getString("t.country");
+                String dbPost = result.getString("a.postalCode");
+                String dbPhone = result.getString("a.phone");
+                Customer customerEdit = new Customer(dbCustID, dbCustName, dbAddress, dbAddress2, dbCity, dbCountry, dbPost, dbPhone);
+                custList.add(customerEdit);               
+            }
             
-
-        //Write SQL Statement
-        String sqlStatement = "SELECT * FROM user";
-        //use Query class to check sql statement for type of query
-        Query.makeQuery(sqlStatement);
-        
-        //Execute Statement and Create ResultSet object
-        ResultSet result = Query.getResult();
-        
-        
-        //Get all records from result set object
-        while(result.next()){
-        System.out.print(result.getInt("userID") + ", ");
-        System.out.print(result.getString("userName") + ", ");
-        System.out.print(result.getString("password") + ", ");
-        System.out.print(result.getInt("active") + ", ");
-        System.out.print(result.getString("createBy") + ", ");
-        System.out.print(result.getDate("createDate") + ", ");
-        System.out.print(result.getDate("lastUpdate") + ", ");
-        System.out.println(result.getString("lastUpdatedBy"));
+            
+            DBConnection.closeConnection();
+        } catch (SQLException sqe){
+            //Show SQL connection messages
+            System.out.println("Error: " + sqe.getMessage());
+        } catch (Exception ex) {
+            System.out.println("Code Barfed " + ex.getMessage());
         }
+
+        CustomerEditCustNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        CustomerEditCustIDCol.setCellValueFactory(new PropertyValueFactory<>("customerId"));
+        CustomerEditCustomerTable.getItems().setAll(custList);
         
-        DBConnection.closeConnection();
-        } catch (Exception ex){
-            System.out.println("Error: " + ex.getMessage());
-        } 
-    }    
+    }
 
     @FXML
     private void CustomerEditFieldIDHandler(ActionEvent event) {
@@ -151,6 +160,12 @@ public class CustomerEditController implements Initializable {
     private void CustomerEditSaveButtonHandler(ActionEvent event) {
     }
 
+    
+
+    @FXML
+    private void CustomerEditComboCityHandler(ActionEvent event) {
+    }
+     
     @FXML
     private void CustomerEditCancelButtonHandler(ActionEvent event) throws IOException {
                 //confirm that the user wants to exit the form
@@ -172,8 +187,5 @@ public class CustomerEditController implements Initializable {
         }
     }
 
-    @FXML
-    private void CustomerEditComboCityHandler(ActionEvent event) {
-    }
     
 }
