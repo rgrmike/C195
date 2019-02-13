@@ -124,6 +124,7 @@ public class CustomerEditController implements Initializable {
         CustomerEditCustIDCol.setCellValueFactory(new PropertyValueFactory<>("customerId"));
         CustomerEditCustomerTable.getItems().setAll(custList);
         CustomerEditComboCity.setItems(cityList);
+        CustomerEditComboCity.getSelectionModel().select(0);
         
     }
 
@@ -148,19 +149,45 @@ public class CustomerEditController implements Initializable {
     }
 
     @FXML
-    private void CustomerEditAddButtonHandler(ActionEvent event) {
-    }
-
-    @FXML
     private void CustomerEditEditButtonHandler(ActionEvent event) {
+        
+        Customer selCustomer = CustomerEditCustomerTable.getSelectionModel().getSelectedItem();
+        
+        if (selCustomer != null){
+        CustomerEditFieldID.setText(selCustomer.getCustomerId().toString());
+        CustomerEditFieldName.setText(selCustomer.getCustomerName());
+        CustomerEditFieldAddr.setText(selCustomer.getAddress());
+        CustomerEditFieldAddr2.setText(selCustomer.getAddress2());
+        CustomerEditComboCity.setValue(selCustomer.getCity());
+        CustomerEditFieldZip.setText(selCustomer.getPostalCode());
+        CustomerEditFieldPhone.setText(selCustomer.getPhone());
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setHeaderText("Nothing Selected");
+            alert.setContentText("Click a Customer to edit");
+            alert.showAndWait();
+        }
+        
     }
 
     @FXML
     private void CustomerEditRemoveButtonHandler(ActionEvent event) {
+        Customer selCustomer = CustomerEditCustomerTable.getSelectionModel().getSelectedItem();
+        
+        if (selCustomer != null){
+            
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setHeaderText("Nothing Selected");
+            alert.setContentText("Click a Customer to delete");
+            alert.showAndWait();
+        }
     }
 
     @FXML
     private void CustomerEditSaveButtonHandler(ActionEvent event) {
+        //Save fields to db
+        //check if this is a new record or not - grab the next customer ID from the database
     }
 
     
@@ -188,6 +215,10 @@ public class CustomerEditController implements Initializable {
             stage.setScene(scene);
             stage.show();
         }
+    }
+
+    @FXML
+    private void CustomerEditFieldAddrHandler(ActionEvent event) {
     }
 
     

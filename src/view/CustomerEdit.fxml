@@ -17,7 +17,7 @@
             <TableColumn fx:id="CustomerEditCustNameCol" prefWidth="170.0" text="Customer Name" />
          </columns>
       </TableView>
-      <TextField fx:id="CustomerEditFieldID" layoutX="421.0" layoutY="70.0" onAction="#CustomerEditFieldIDHandler" />
+      <TextField fx:id="CustomerEditFieldID" editable="false" layoutX="421.0" layoutY="70.0" onAction="#CustomerEditFieldIDHandler" />
       <TextField fx:id="CustomerEditFieldName" layoutX="421.0" layoutY="105.0" onAction="#CustomerEditFieldNameHandler" />
       <TextField fx:id="CustomerEditFieldAddr" layoutX="421.0" layoutY="138.0" onAction="#CustomerEditFieldAddrHandler" />
       <TextField fx:id="CustomerEditFieldAddr2" layoutX="421.0" layoutY="172.0" onAction="#CustomerEditFieldAddr2Handler" />
