@@ -82,6 +82,7 @@ public class CustomerEditController implements Initializable {
     ObservableList<City>cityList = FXCollections.observableArrayList();
     private Repo currentRepo;
     private boolean editMe = false;
+    Customer selCustomer = new Customer();
     
     
     
@@ -94,7 +95,7 @@ public class CustomerEditController implements Initializable {
         // Populate custList
         try {
             DBConnection.makeConnection();
-            String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, y.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.addressID JOIN country t ON y.countryId = t.countryId";
+            String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, a.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.cityId JOIN country t ON y.countryId = t.countryId";
             Query.makeQuery(sqlStatement);
             ResultSet result = Query.getResult();
             System.out.println(result);
@@ -104,7 +105,7 @@ public class CustomerEditController implements Initializable {
                 Integer dbAddressId = result.getInt("a.addressId");
                 String dbAddress = result.getString("a.address");
                 String dbAddress2 = result.getString("a.address2");
-                Integer dbCityId = result.getInt("y.cityId");
+                Integer dbCityId = result.getInt("a.cityId");
                 String dbCity = result.getString("y.city");
                 String dbCountry = result.getString("t.country");
                 String dbPost = result.getString("a.postalCode");
@@ -163,14 +164,15 @@ public class CustomerEditController implements Initializable {
     @FXML
     private void CustomerEditEditButtonHandler(ActionEvent event) {
         
-        Customer selCustomer = CustomerEditCustomerTable.getSelectionModel().getSelectedItem();
+        selCustomer = CustomerEditCustomerTable.getSelectionModel().getSelectedItem();
         
         if (selCustomer != null){
         CustomerEditFieldID.setText(selCustomer.getCustomerId().toString());
         CustomerEditFieldName.setText(selCustomer.getCustomerName());
         CustomerEditFieldAddr.setText(selCustomer.getAddress());
         CustomerEditFieldAddr2.setText(selCustomer.getAddress2());
-        CustomerEditCityTable.getSelectionModel().select(selCustomer.getCityId() - 1);
+        Integer cityIdHolder = selCustomer.getCityId();
+        CustomerEditCityTable.getSelectionModel().select(cityIdHolder - 1);
         CustomerEditFieldZip.setText(selCustomer.getPostalCode());
         CustomerEditFieldPhone.setText(selCustomer.getPhone());
         editMe = true;
@@ -185,12 +187,12 @@ public class CustomerEditController implements Initializable {
     
     @FXML
     private void CustomerEditSaveButtonHandler(ActionEvent event) throws IOException {
-        
+        String formCustId = "";
         //Save fields to db
         //check if this is a new record or not - grab the next customer ID from the database
         if (CustomerEditFieldID.getText() != null){
             //can't edit the ID field so if it is null then it is a new record and we generate the ID
-            String formCustId = CustomerEditFieldID.getText();
+            formCustId = CustomerEditFieldID.getText();
         }
         String fromCustName = CustomerEditFieldName.getText();
         String fromCustAddr = CustomerEditFieldAddr.getText();
@@ -199,16 +201,19 @@ public class CustomerEditController implements Initializable {
         String fromCustZip = CustomerEditFieldZip.getText();
         String fromCustPhone = CustomerEditFieldPhone.getText();
         if (editMe == true){
-            /*
-            "UPDATE address, customer, city, country "
-                        + "SET address = ?, address2 = ?, address.cityId = ?, postalCode = ?, phone = ?, address.lastUpdate = CURRENT_TIMESTAMP, address.lastUpdateBy = ? "
-                        + "WHERE customer.customerId = ? AND customer.addressId = address.addressId AND address.cityId = city.cityId AND city.countryId = country.countryId"
-            
-            "UPDATE customer, address, city "
-                + "SET customerName = ?, customer.lastUpdate = CURRENT_TIMESTAMP, customer.lastUpdateBy = ? "
-                + "WHERE customer.customerId = ? AND customer.addressId = address.addressId AND address.cityId = city.cityId"
-            */
-            
+            String fromAddressId = selCustomer.getAddressId().toString();
+            try{
+               DBConnection.makeConnection();
+               String sqlSOne ="Update address SET address = " + fromCustAddr + ", address2 = " + fromCustAddr2 + ", cityId = " + fromCustCityId.toString() + ", postalCode = " + fromCustZip + ", phone = " + fromCustPhone + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE addressId = " + fromAddressId;
+                Query.makeQuery(sqlSOne);
+                String sqlSTwo ="Update customer SET customerName =" + fromCustName + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE customerId = " + formCustId;
+                Query.makeQuery(sqlSTwo);
+            }catch (SQLException sqe){
+            //Show SQL connection messages
+            System.out.println("Error: " + sqe.getMessage());
+            } catch (Exception ex) {
+                System.out.println("Delete Code Barfed " + ex.getMessage());
+            }   
         } else {
             try {
                 //this is a new customer - we check the DB for the next ID's and insert everything into the DB
@@ -256,7 +261,7 @@ public class CustomerEditController implements Initializable {
 
     @FXML
     private void CustomerEditRemoveButtonHandler(ActionEvent event) {
-        Customer selCustomer = CustomerEditCustomerTable.getSelectionModel().getSelectedItem();
+        selCustomer = CustomerEditCustomerTable.getSelectionModel().getSelectedItem();
         
         if (selCustomer != null){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -291,11 +296,6 @@ public class CustomerEditController implements Initializable {
         }
     }
 
-    
-
-    
-
-     
     @FXML
     private void CustomerEditCancelButtonHandler(ActionEvent event) throws IOException {
                 //confirm that the user wants to exit the form
