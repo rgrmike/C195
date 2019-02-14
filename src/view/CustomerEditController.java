@@ -184,26 +184,55 @@ public class CustomerEditController implements Initializable {
     }
     
     @FXML
-    private void CustomerEditSaveButtonHandler(ActionEvent event) {
-        Integer nextCustomerId;
+    private void CustomerEditSaveButtonHandler(ActionEvent event) throws IOException {
+        
         //Save fields to db
         //check if this is a new record or not - grab the next customer ID from the database
+        if (CustomerEditFieldID.getText() != null){
+            //can't edit the ID field so if it is null then it is a new record and we generate the ID
+            String formCustId = CustomerEditFieldID.getText();
+        }
+        String fromCustName = CustomerEditFieldName.getText();
+        String fromCustAddr = CustomerEditFieldAddr.getText();
+        String fromCustAddr2 = CustomerEditFieldAddr2.getText();
+        Integer fromCustCityId = CustomerEditCityTable.getSelectionModel().getSelectedItem().getCityId();
+        String fromCustZip = CustomerEditFieldZip.getText();
+        String fromCustPhone = CustomerEditFieldPhone.getText();
         if (editMe == true){
+            /*
+            "UPDATE address, customer, city, country "
+                        + "SET address = ?, address2 = ?, address.cityId = ?, postalCode = ?, phone = ?, address.lastUpdate = CURRENT_TIMESTAMP, address.lastUpdateBy = ? "
+                        + "WHERE customer.customerId = ? AND customer.addressId = address.addressId AND address.cityId = city.cityId AND city.countryId = country.countryId"
+            
+            "UPDATE customer, address, city "
+                + "SET customerName = ?, customer.lastUpdate = CURRENT_TIMESTAMP, customer.lastUpdateBy = ? "
+                + "WHERE customer.customerId = ? AND customer.addressId = address.addressId AND address.cityId = city.cityId"
+            */
             
         } else {
             try {
+                //this is a new customer - we check the DB for the next ID's and insert everything into the DB
+                Integer nextCustomerId = 0;
+                Integer nextAddressId = 0;
                 DBConnection.makeConnection();
-                //Create Statement object
                 String sqlStatementOne = "SELECT MAX(customerId) FROM customer ";
                 Query.makeQuery(sqlStatementOne);
                 ResultSet resultOne = Query.getResult();
                 while(resultOne.next()){
                     nextCustomerId = (resultOne.getInt("customerId") + 1);
                 }
-                //need to make add cityID
-                //one statement for customer and one for address
-                String sqlStatementTwo ="";
+                String sqlStatementTwo = "SELECT MAX(addressId) FROM address ";
                 Query.makeQuery(sqlStatementTwo);
+                ResultSet resultTwo = Query.getResult();
+                while(resultTwo.next()){
+                    nextAddressId = (resultOne.getInt("addressId") + 1);
+                }
+                
+                String sqlStatementThree ="INSERT INTO address (addressId, address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES ("+ nextAddressId +", "+ fromCustAddr +", " + fromCustAddr2 +", " + fromCustCityId.toString() +", " + fromCustZip +", " + fromCustPhone +", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
+                Query.makeQuery(sqlStatementThree);
+                String sqlStatementFour ="INSERT INTO customer (customerId, customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES (" + nextCustomerId + ", " + fromCustName + ", " + nextAddressId + ", 1, CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ")";
+                Query.makeQuery(sqlStatementFour);
+                
                 DBConnection.closeConnection();
             } catch (SQLException sqe){
             //Show SQL connection messages
@@ -212,6 +241,17 @@ public class CustomerEditController implements Initializable {
                 System.out.println("Delete Code Barfed " + ex.getMessage());
             }      
         }
+        //after saving close the form and go back to calendar
+        Stage stage; 
+            Parent root;
+            //get reference to the button's stage         
+            stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
+            //load up OTHER FXML document
+            root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
+            //create a new scene with root and set the stage
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
     }
 
     @FXML
