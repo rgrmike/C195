@@ -33,9 +33,10 @@
       </TableView>
       <TableView fx:id="ReportApptCountTable" layoutX="24.0" layoutY="391.0" prefHeight="200.0" prefWidth="391.0">
         <columns>
-          <TableColumn fx:id="ReportMonthCol" prefWidth="75.0" text="Month" />
-          <TableColumn fx:id="ReportApptTypeCol" prefWidth="208.5" text="Appointment Type" />
-            <TableColumn fx:id="ReportSumCol" prefWidth="105.0" text="Sum" />
+          <TableColumn fx:id="ReportMonthCol" prefWidth="64.5" text="Month" />
+          <TableColumn fx:id="ReportYearCol" prefWidth="59.5" text="Year" />
+            <TableColumn fx:id="ReportTypeCol" prefWidth="140.5" text="Appointment Type" />
+            <TableColumn fx:id="ReportSumCol" prefWidth="127.5" text="Sum" />
         </columns>
       </TableView>
       <Button fx:id="ReportCancel" layoutX="533.0" layoutY="569.0" mnemonicParsing="false" onAction="#ReportCancelHandler" text="Cancel" />

@@ -7,8 +7,12 @@ package view;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,7 +26,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import model.Customer;
+import model.DBConnection;
+import model.Query;
+import model.MonthRpt;
 
 /**
  * FXML Controller class
@@ -30,7 +39,6 @@ import javafx.stage.Stage;
  * @author mian
  */
 public class ReportsController implements Initializable {
-
     @FXML
     private ComboBox<?> ReportConsultantPicker;
     @FXML
@@ -50,22 +58,55 @@ public class ReportsController implements Initializable {
     @FXML
     private TableColumn<?, ?> ReportDescriptionCol;
     @FXML
-    private TableView<?> ReportApptCountTable;
+    private TableView<MonthRpt> ReportApptCountTable;
     @FXML
-    private TableColumn<?, ?> ReportMonthCol;
+    private TableColumn<MonthRpt, String> ReportMonthCol;
     @FXML
-    private TableColumn<?, ?> ReportApptTypeCol;
+    private TableColumn<MonthRpt, String> ReportYearCol;
     @FXML
-    private TableColumn<?, ?> ReportSumCol;
+    private TableColumn<MonthRpt, String> ReportTypeCol;
+    @FXML
+    private TableColumn<MonthRpt, String> ReportSumCol;
     @FXML
     private Button ReportCancel;
+    
+    ObservableList<MonthRpt> monthList = FXCollections.observableArrayList();
+    
+    
+    
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        try {
+            DBConnection.makeConnection();
+            String sqlStatement = "SELECT MONTHNAME(start) as Month, YEAR(start) as Year, description, Count(*) as Sum FROM appointment GROUP BY MONTHNAME(start), YEAR(start), description;";
+            Query.makeQuery(sqlStatement);
+            ResultSet resultTwo = Query.getResult();
+            while(resultTwo.next()){
+                String dbMonth = resultTwo.getString("Month");
+                String dbYear = resultTwo.getString("Year");
+                String dbType = resultTwo.getString("description");
+                String dbSum = resultTwo.getString("Sum");
+                MonthRpt thisMonth = new MonthRpt(dbMonth, dbYear, dbType, dbSum);
+                monthList.add(thisMonth);
+                
+            }
+            DBConnection.closeConnection();
+        } catch (SQLException sqe){
+            //Show SQL connection messages
+            System.out.println("Error: " + sqe.getMessage());
+        } catch (Exception ex) {
+            System.out.println("Code Barfed " + ex.getMessage());
+        }
+        ReportMonthCol.setCellValueFactory(new PropertyValueFactory<>("month"));
+        ReportYearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
+        ReportTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        ReportSumCol.setCellValueFactory(new PropertyValueFactory<>("sum"));
+        ReportApptCountTable.getItems().setAll(monthList);
+        
     }    
 
     @FXML
