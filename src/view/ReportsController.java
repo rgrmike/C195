@@ -9,8 +9,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,10 +34,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.collections.transformation.FilteredList;
+import model.Appt;
 import model.Customer;
 import model.DBConnection;
 import model.Query;
 import model.MonthRpt;
+import model.Repo;
 
 /**
  * FXML Controller class
@@ -40,23 +49,23 @@ import model.MonthRpt;
  */
 public class ReportsController implements Initializable {
     @FXML
-    private ComboBox<?> ReportConsultantPicker;
+    private ComboBox<String> ReportConsultantPicker;
     @FXML
     private DatePicker ReportDatePicker;
     @FXML
-    private TableView<?> ReportTable;
+    private TableView<Appt> ReportTable;
     @FXML
-    private TableColumn<?, ?> ReportApptCol;
+    private TableColumn<Appt, String> ReportApptCol;
     @FXML
-    private TableColumn<?, ?> ReportStartCol;
+    private TableColumn<Appt, String> ReportStartCol;
     @FXML
-    private TableColumn<?, ?> ReportEndCol;
+    private TableColumn<Appt, String> ReportEndCol;
     @FXML
-    private TableColumn<?, ?> ReportContactCol;
+    private TableColumn<Appt, String> ReportContactCol;
     @FXML
-    private TableColumn<?, ?> ReportCustomerCol;
+    private TableColumn<Appt, Customer> ReportCustomerCol;
     @FXML
-    private TableColumn<?, ?> ReportDescriptionCol;
+    private TableColumn<Appt, String> ReportDescriptionCol;
     @FXML
     private TableView<MonthRpt> ReportApptCountTable;
     @FXML
@@ -71,28 +80,75 @@ public class ReportsController implements Initializable {
     private Button ReportCancel;
     
     ObservableList<MonthRpt> monthList = FXCollections.observableArrayList();
-    
-    
-    
-
-    /**
+    ObservableList<Appt>displayDate = FXCollections.observableArrayList();
+    ObservableList<Appt> apptReportList = FXCollections.observableArrayList();
+    ObservableList<String>apptUserList = FXCollections.observableArrayList();
+    ObservableList<Appt>displayUser = FXCollections.observableArrayList();
+    private Repo currentRepo;
+    ZoneId locationHolder;
+    ZoneId myLocationZone = ZoneId.systemDefault();
+     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        //populate the ReportConsultantPicker
+        
+        ReportDatePicker.setValue(LocalDate.now());
         try {
+            //gather data for the summary report
             DBConnection.makeConnection();
             String sqlStatement = "SELECT MONTHNAME(start) as Month, YEAR(start) as Year, description, Count(*) as Sum FROM appointment GROUP BY MONTHNAME(start), YEAR(start), description;";
             Query.makeQuery(sqlStatement);
-            ResultSet resultTwo = Query.getResult();
-            while(resultTwo.next()){
-                String dbMonth = resultTwo.getString("Month");
-                String dbYear = resultTwo.getString("Year");
-                String dbType = resultTwo.getString("description");
-                String dbSum = resultTwo.getString("Sum");
+            ResultSet result = Query.getResult();
+            while(result.next()){
+                String dbMonth = result.getString("Month");
+                String dbYear = result.getString("Year");
+                String dbType = result.getString("description");
+                String dbSum = result.getString("Sum");
                 MonthRpt thisMonth = new MonthRpt(dbMonth, dbYear, dbType, dbSum);
                 monthList.add(thisMonth);
                 
+            }
+            String sqlTwo = "SELECT appointment.title, appointment.location, appointment.start, appointment.end, appointment.contact, appointment.customerID, customer.customerName, appointment.description, appointment.appointmentID FROM appointment INNER JOIN customer ON appointment.customerId=customer.customerId";
+            Query.makeQuery(sqlTwo);
+            ResultSet r2 = Query.getResult();
+            while(r2.next()){
+                String dbApptTitle = r2.getString("appointment.title");
+                String dbApptLocation = r2.getString("appointment.location");
+                //Based on the meeting location generate the time zone ID
+                switch(dbApptLocation){
+                    case "New York, New York":
+                    locationHolder = ZoneId.of("US/Eastern");
+                    case "Online":
+                    locationHolder = ZoneId.of("US/Eastern");
+                    case "Phoenix, Arizona":
+                    locationHolder = ZoneId.of("US/Arizona");
+                    case "London, England":
+                    locationHolder = ZoneId.of("Europe/London");
+                }
+                Timestamp localApptStart = r2.getTimestamp("appointment.start");
+                ZonedDateTime localZoneApptStart = ZonedDateTime.ofInstant(localApptStart.toInstant(), locationHolder);
+                ZonedDateTime transitStartTime = localZoneApptStart.withZoneSameInstant(myLocationZone);
+                String dbApptStart = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitStartTime);
+                Timestamp localApptEnd = r2.getTimestamp("appointment.end");
+                ZonedDateTime localZoneApptEnd = ZonedDateTime.ofInstant(localApptEnd.toInstant(), locationHolder);
+                ZonedDateTime transitEndTime = localZoneApptEnd.withZoneSameInstant(myLocationZone);
+                String dbApptEnd = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitEndTime);
+                String dbApptContact = r2.getString("appointment.contact");
+                Customer dbCustomer = new Customer(result.getInt("appointment.customerID"),result.getString("customer.customerName"));
+                String dbDescription = r2.getString("appointment.description");
+                Integer DBApptID = r2.getInt("appointment.appointmentID");
+                Appt apptRpt = new Appt(DBApptID, dbApptTitle, dbApptStart, dbApptEnd, dbApptContact, dbCustomer, dbDescription, dbApptLocation);
+                apptReportList.add(apptRpt);
+                
+                String sqlThree = "SELECT userName from user";
+            Query.makeQuery(sqlThree);
+            ResultSet resultThree = Query.getResult();
+            while(resultThree.next()){
+                String dbUsrName = result.getString("userName");
+                apptUserList.add(dbUsrName);
+            }
             }
             DBConnection.closeConnection();
         } catch (SQLException sqe){
@@ -101,21 +157,44 @@ public class ReportsController implements Initializable {
         } catch (Exception ex) {
             System.out.println("Code Barfed " + ex.getMessage());
         }
+        //Populate the Monthly Report
         ReportMonthCol.setCellValueFactory(new PropertyValueFactory<>("month"));
         ReportYearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
         ReportTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         ReportSumCol.setCellValueFactory(new PropertyValueFactory<>("sum"));
         ReportApptCountTable.getItems().setAll(monthList);
-        
+        //Populate the appt List
+        ReportStartCol.setCellValueFactory(new PropertyValueFactory<>("start"));
+        ReportEndCol.setCellValueFactory(new PropertyValueFactory<>("end"));
+        ReportContactCol.setCellValueFactory(new PropertyValueFactory<>("contact"));
+        ReportCustomerCol.setCellValueFactory(new PropertyValueFactory<>("customer"));
+        ReportDescriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        ReportApptCol.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
+        ReportTable.getItems().setAll(apptReportList);
+        ReportConsultantPicker.setItems(apptUserList);
     }    
 
     @FXML
     private void ReportConsultantPickerHandler(ActionEvent event) {
+        String userHolder = ReportConsultantPicker.getValue();
+        displayUser = apptReportList.stream().filter(p -> p.getContact().equals(userHolder)).collect(Collectors.toCollection(FXCollections::observableArrayList));
+        ReportTable.setItems(displayUser);
+        
     }
 
     @FXML
     private void ReportDatePickerHandler(ActionEvent event) {
-    }
+        
+        //grab the contents of the date tool
+        LocalDate pickDate = ReportDatePicker.getValue();
+        //lamda stream to compare date from the date picker to all of the appts
+        displayDate = apptReportList.stream()
+                .filter(p -> LocalDate.parse(p.getStart()).isEqual(pickDate))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        
+        //set the table view to display the filtered list
+        ReportTable.setItems(displayDate);
+        }
 
     @FXML
     private void ReportCancelHandler(ActionEvent event) throws IOException {

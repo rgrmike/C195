@@ -97,9 +97,7 @@ public class ApptEditController implements Initializable {
         //populate the combo boxes
         apptTypeList.addAll("First Meeting", "First Consultation", "Follow-up");
         ApptEditTypeCombo.setItems(apptTypeList);
-        //Remove this later *** apptUserList.addAll ("user1", "user2");
         ApptEditContact.setItems(apptUserList);
-        
         ApptEditTypeCombo.getSelectionModel().select(0);
         apptLocationList.addAll("New York, NewYork", "Phoenix, Arizona", "London, England", "Online");
         ApptEditLocation.setItems(apptLocationList);
@@ -192,7 +190,6 @@ public class ApptEditController implements Initializable {
                     saveLocationHolder = ZoneId.of("US/Arizona");
                     case "London, England":
                     saveLocationHolder = ZoneId.of("Europe/London");
-                
                 }
         //get the time from the combo box and convert it to local time
         
