@@ -178,7 +178,13 @@ public class ReportsController implements Initializable {
     private void ReportConsultantPickerHandler(ActionEvent event) {
         String userHolder = ReportConsultantPicker.getValue();
         displayUser = apptReportList.stream().filter(p -> p.getContact().equals(userHolder)).collect(Collectors.toCollection(FXCollections::observableArrayList));
-        ReportTable.setItems(displayUser);
+        if (displayUser == null) {
+            //todo - make a pop up if the report table is null
+        } else {
+            ReportTable.setItems(displayUser);
+        }
+        
+        
         
     }
 
