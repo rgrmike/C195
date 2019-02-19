@@ -14,9 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -101,6 +98,7 @@ public class ApptEditController implements Initializable {
         ApptEditTypeCombo.getSelectionModel().select(0);
         apptLocationList.addAll("New York, NewYork", "Phoenix, Arizona", "London, England", "Online");
         ApptEditLocation.setItems(apptLocationList);
+        //prevent user from entering meeting outside business hours
         ApptEditLocation.getSelectionModel().select(0);
         apptStartList.addAll("08:00:00","09:00:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
         ApptEditStart.setItems(apptStartList);
@@ -174,82 +172,143 @@ public class ApptEditController implements Initializable {
     @FXML
     private void ApptEditSaveHandler(ActionEvent event) {
         //grab the values from the form
-        //going to need to add userid
+        String errorMsg = "";
         String dbUpdateCustId = ApptEditCustTable.getSelectionModel().getSelectedItem().getCustomerId().toString();
         String dbUpdateTitle = ApptEditTypeField.getText();
         String dbUpdateDesc = ApptEditTypeCombo.getValue();
         String dbUpdateContact = ApptEditContact.getValue();
         LocalDate dbUpdateDate = ApptEditDatePicker.getValue();
         String dbUpdateLocation = ApptEditLocation.getValue();
-        switch(dbUpdateLocation){
-                    case "New York, New York":
-                    saveLocationHolder = ZoneId.of("US/Eastern");
-                    case "Online":
-                    saveLocationHolder = ZoneId.of("US/Eastern");
-                    case "Phoenix, Arizona":
-                    saveLocationHolder = ZoneId.of("US/Arizona");
-                    case "London, England":
-                    saveLocationHolder = ZoneId.of("Europe/London");
-                }
-        //get the time from the combo box and convert it to local time
-        
         LocalTime dbUpdateStartTime = LocalTime.parse(ApptEditStart.getValue());
         LocalTime dbUpdateEndTime = LocalTime.parse(ApptEditEnd.getValue());
-        //create a zoned date time entry as a local time zone and convert the local time to the time zone of where the appointment is
-        ZonedDateTime dbUpdateZOneStart = ZonedDateTime.of(dbUpdateDate, dbUpdateStartTime, saveLocationZone).withZoneSameInstant(saveLocationHolder);
-        ZonedDateTime dbUpdateZOneEnd = ZonedDateTime.of(dbUpdateDate, dbUpdateEndTime, saveLocationZone).withZoneSameInstant(saveLocationHolder);
-        //transition to timestamp and then string for mysql
-        //look up the .isafter setting to validate the code
-        Timestamp transferStart = Timestamp.valueOf(dbUpdateZOneStart.toLocalDateTime());
-        Timestamp transferEnd = Timestamp.valueOf(dbUpdateZOneEnd.toLocalDateTime());
-
-        String dbUStart = transferStart.toString();
-        String dbUEnd = transferEnd.toString();
-        //convert the apptID to a string for and update
-        String dbApptId = editApptId.toString();
-        
-        if(currentRepo.getrepoIsEdit()==true){
-        //if isEdit is true then we are updating an existing record
-        try {
-            DBConnection.makeConnection();
-            String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = " + dbUpdateTitle + ", description = " + dbUpdateDesc + ", location = " + dbUpdateLocation + ", contact = "+ dbUpdateContact +",start = "+ dbUStart +", end = "+ dbUEnd +", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy =" + currentRepo.getrepoUserName() + " WERE appointmentId = " + dbApptId;
-            Query.makeQuery(sqlStatement);
-            ResultSet result = Query.getResult();
-            System.out.println(result);
-
-        DBConnection.closeConnection();
-        } catch (SQLException sqe){
-            //Show SQL connection messages
-            System.out.println("Error: " + sqe.getMessage());
-        } catch (Exception ex) {
-            System.out.println("Code Barfed " + ex.getMessage());
+        if (dbUpdateTitle == null || dbUpdateTitle.isEmpty()){
+            errorMsg += "Please enter Title. ";
+        } 
+        if (dbUpdateDesc == null || dbUpdateDesc.isEmpty()){
+            errorMsg += "Please enter Description. ";
         }
-        }else{
-            //this is a new appointment so we are going to insert it into the apppointments table
-            //first grab the last appointmentId from the database
-            try {
-                DBConnection.makeConnection();
-                String sqlStatement = "SELECT MAX(appointmentId) FROM appointment";
-                Query.makeQuery(sqlStatement);
-                ResultSet result = Query.getResult();
-                while(result.next()){
-                Integer dbMaxApptId = result.getInt("appointmentId");
-                //increment the appointmentId by 1
-                newMaxApptId = dbMaxApptId +1;
-                //replace admin with user from user class
-                String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", " + dbUpdateTitle + ", " + dbUpdateDesc + ", " + dbUpdateLocation + ", " + dbUpdateContact + ", " + dbUStart + ", " + dbUEnd + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
-                Query.makeQuery(sqlStatementtwo);
-                ResultSet resulttwo = Query.getResult();
+        if (dbUpdateContact == null || dbUpdateContact.isEmpty()){
+            errorMsg += "Please enter Contact. ";
+        }
+         if (dbUpdateLocation == null || dbUpdateLocation.isEmpty()){
+            errorMsg += "Please enter Location. ";
+        } else if (dbUpdateEndTime.equals(dbUpdateEndTime) || dbUpdateEndTime.isBefore(dbUpdateStartTime)){
+            errorMsg += "The Appointment End time must be after the start time. ";
+        }
+        //if the error is blank then run the Save code
+         if (errorMsg == ""){
+            //figure out which location the appt is from
+             switch(dbUpdateLocation){
+                        case "New York, New York":
+                        saveLocationHolder = ZoneId.of("US/Eastern");
+                        case "Online":
+                        saveLocationHolder = ZoneId.of("US/Eastern");
+                        case "Phoenix, Arizona":
+                        saveLocationHolder = ZoneId.of("US/Arizona");
+                        case "London, England":
+                        saveLocationHolder = ZoneId.of("Europe/London");
+                    }
+            //get the time from the combo box and convert it to local time
+            //create a zoned date time entry as a local time zone and convert the local time to the time zone of where the appointment is
+            ZonedDateTime dbUpdateZOneStart = ZonedDateTime.of(dbUpdateDate, dbUpdateStartTime, saveLocationZone).withZoneSameInstant(saveLocationHolder);
+            ZonedDateTime dbUpdateZOneEnd = ZonedDateTime.of(dbUpdateDate, dbUpdateEndTime, saveLocationZone).withZoneSameInstant(saveLocationHolder);
+            //transition to timestamp and then string for mysql
+            //look up the .isafter setting to validate the code
+            Timestamp transferStart = Timestamp.valueOf(dbUpdateZOneStart.toLocalDateTime());
+            Timestamp transferEnd = Timestamp.valueOf(dbUpdateZOneEnd.toLocalDateTime());
+            String dbUStart = transferStart.toString();
+            String dbUEnd = transferEnd.toString();
+            //convert the apptID to a string for and update
+            String dbApptId = editApptId.toString();
+            //check to see if there is a conflict for our appointment
+            if (checkConflict(dbUStart, dbUEnd) == true) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Conflict");
+                alert.setContentText("Conflicting appointment found - please check times");
+                alert.showAndWait();
+            } else {
+                //If all error conditions are ok then go ahead and update the database
+                if(currentRepo.getrepoIsEdit()==true){
+                    //if isEdit is true then we are updating an existing record
+                    try {
+                        DBConnection.makeConnection();
+                        String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = " + dbUpdateTitle + ", description = " + dbUpdateDesc + ", location = " + dbUpdateLocation + ", contact = "+ dbUpdateContact +",start = "+ dbUStart +", end = "+ dbUEnd +", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy =" + currentRepo.getrepoUserName() + " WERE appointmentId = " + dbApptId;
+                        Query.makeQuery(sqlStatement);
+                        ResultSet result = Query.getResult();
+                        System.out.println(result);
+
+                    DBConnection.closeConnection();
+                    } catch (SQLException sqe){
+                        //Show SQL connection messages
+                        System.out.println("Error: " + sqe.getMessage());
+                    } catch (Exception ex) {
+                        System.out.println("Code Barfed " + ex.getMessage());
+                    }
+                }else{
+                    //this is a new appointment so we are going to insert it into the apppointments table
+                    //first grab the last appointmentId from the database
+                    try {
+                        DBConnection.makeConnection();
+                        String sqlStatement = "SELECT MAX(appointmentId) FROM appointment";
+                        Query.makeQuery(sqlStatement);
+                        ResultSet result = Query.getResult();
+                        while(result.next()){
+                        Integer dbMaxApptId = result.getInt("appointmentId");
+                        //increment the appointmentId by 1
+                        newMaxApptId = dbMaxApptId +1;
+                        //replace admin with user from user class
+                        String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", " + dbUpdateTitle + ", " + dbUpdateDesc + ", " + dbUpdateLocation + ", " + dbUpdateContact + ", " + dbUStart + ", " + dbUEnd + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
+                        Query.makeQuery(sqlStatementtwo);
+                        ResultSet resulttwo = Query.getResult();
+                        }
+                    DBConnection.closeConnection();
+                    } catch (SQLException sqe){
+                        //Show SQL connection messages
+                        System.out.println("Error: " + sqe.getMessage());
+                    }   catch (Exception ex) {
+                        System.out.println("Code Barfed " + ex.getMessage());
+                    }
                 }
-            DBConnection.closeConnection();
-            } catch (SQLException sqe){
-                //Show SQL connection messages
-                System.out.println("Error: " + sqe.getMessage());
-            }   catch (Exception ex) {
-                System.out.println("Code Barfed " + ex.getMessage());
             }
-            
+        } else {
+            //Show the error
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Form Error");
+            alert.setContentText(errorMsg);
+            alert.showAndWait();
         }
+        
+    }
+    
+    private boolean checkConflict(String checkStart, String checkEnd) {
+        String dbAppointmentId;
+        if(currentRepo.getrepoIsEdit()==true){
+            //if true this is an edit
+            dbAppointmentId = currentRepo.getRepoSelectEditApt().getAppointmentID().toString();                   
+        } else {
+            //this is a new appoinment
+            dbAppointmentId = "0";
+        }
+        
+        try {
+                    DBConnection.makeConnection();
+                    String sqlCheckConflict = "SELECT * FROM appointment WHERE (" + checkStart + " BETWEEN start AND end OR " + checkEnd + " BETWEEN start AND end) AND appointmentID != " + dbAppointmentId;
+                    Query.makeQuery(sqlCheckConflict);
+                    ResultSet resultCheckConflict = Query.getResult();
+                    if (resultCheckConflict.next()){
+                        return true;
+                    }
+                   
+
+                DBConnection.closeConnection();
+                } catch (SQLException sqe){
+                    //Show SQL connection messages
+                    System.out.println("Error: " + sqe.getMessage());
+                } catch (Exception ex) {
+                    System.out.println("Code Barfed " + ex.getMessage());
+                }
+        return false;
+        
         
     }
 
