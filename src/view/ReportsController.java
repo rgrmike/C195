@@ -179,7 +179,8 @@ public class ReportsController implements Initializable {
         String userHolder = ReportConsultantPicker.getValue();
         displayUser = apptReportList.stream().filter(p -> p.getContact().equals(userHolder)).collect(Collectors.toCollection(FXCollections::observableArrayList));
         if (displayUser == null) {
-            //todo - make a pop up if the report table is null
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText("No Appointments found for selected User.");
         } else {
             ReportTable.setItems(displayUser);
         }
@@ -199,7 +200,12 @@ public class ReportsController implements Initializable {
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         
         //set the table view to display the filtered list
+        if (displayDate == null){
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText("No Appointments found for selected Date.");
+        } else {
         ReportTable.setItems(displayDate);
+        }
         }
 
     @FXML

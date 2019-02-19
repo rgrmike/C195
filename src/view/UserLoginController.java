@@ -16,8 +16,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -202,7 +204,8 @@ public class UserLoginController implements Initializable {
                 } else {
                     UserLoginErrorLabel.setText("Welcome!");
                 }
-            
+            //check for reminders
+                Remind();
             //open the calendar page
             //get reference to the button's stage         
             Stage stage; 
@@ -224,8 +227,6 @@ public class UserLoginController implements Initializable {
                 } else {
                     UserLoginErrorLabel.setText("Password Incorrect");
                 }
-                
-                
             }
         }
     }
@@ -247,27 +248,37 @@ public class UserLoginController implements Initializable {
     
     private void Remind(){
         //Lamda expression to filter the array list for user and appointment
-        /* This is the check for time
-        ZonedDateTime myMonthDateNow = ZonedDateTime.now(myLocationZone).minusDays(1);
-        //grab the system date and add a Month
-        ZonedDateTime mySystemMonth = ZonedDateTime.now(myLocationZone).plusMonths(1);
-        ObservableList<Appt> displayMon = appointmentList.stream()
-                .filter(p -> ZonedDateTime.parse(p.getStart()).isAfter(myMonthDateNow) && ZonedDateTime.parse(p.getStart()).isBefore(mySystemMonth))
+        
+        
+        ZonedDateTime myTimeNow = ZonedDateTime.now(myLocationZone);
+        ZonedDateTime myTimeIn15 = ZonedDateTime.now(myLocationZone).plusMinutes(16);
+        ObservableList<Appt> displayUser = appointmentList.stream()
+                .filter(p -> ZonedDateTime.parse(p.getStart()).isAfter(myTimeNow) && ZonedDateTime.parse(p.getStart()).isBefore(myTimeIn15) && p.getContact().equals(dbUserName))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
-        System.out.println("The Month is: "+ displayMon.toString());
-        //set the table view to display the filtered list
-        CalendarTable.setItems(displayMon);
-        */
         
-        /*Lamda to check for user - filter appts into the next few minutes - if there are not any then set the message to skip the user check
-        String userHolder = ReportConsultantPicker.getValue();
-        displayUser = apptReportList.stream().filter(p -> p.getContact().equals(userHolder)).collect(Collectors.toCollection(FXCollections::observableArrayList));
-        ReportTable.setItems(displayUser);
-        */
         //pop up an alert box with the appointments in 15 min or no appt
-        
-        
-        
+        if (displayUser == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText("No Appointments found for: " + dbUserName);
+        } else {
+            //create a String Builder to concant multiple appointments 
+            StringBuilder sb = new StringBuilder();
+            //define a string to hold the appointments
+            String s = "";
+            //iterate the list and append all appointments
+            for (int count = 0; count < displayUser.size(); count++){
+                sb.append(" Appointment: ");
+                sb.append(displayUser.get(count).getAppointmentTitle());
+                sb.append(" With: ");
+                sb.append(displayUser.get(count).getCustomer());
+                sb.append(" At: ");
+                sb.append(displayUser.get(count).getStart());
+            }
+            //make the string for the alert pop up
+            s = sb.toString();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Appointment" + s + "found for:" + dbUserName);
+        }
     }
     
     private void LogToFile(){
