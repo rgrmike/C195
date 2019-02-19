@@ -5,7 +5,9 @@
  */
 package view;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +21,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -135,7 +136,6 @@ public class UserLoginController implements Initializable {
             System.out.println("Code Barfed " + ex.getMessage());
         }
         
-        
     }   
     
     @FXML
@@ -204,8 +204,10 @@ public class UserLoginController implements Initializable {
                 } else {
                     UserLoginErrorLabel.setText("Welcome!");
                 }
+            //log this to the login file
+            LogToFile();
             //check for reminders
-                Remind();
+            Remind();
             //open the calendar page
             //get reference to the button's stage         
             Stage stage; 
@@ -248,8 +250,6 @@ public class UserLoginController implements Initializable {
     
     private void Remind(){
         //Lamda expression to filter the array list for user and appointment
-        
-        
         ZonedDateTime myTimeNow = ZonedDateTime.now(myLocationZone);
         ZonedDateTime myTimeIn15 = ZonedDateTime.now(myLocationZone).plusMinutes(16);
         ObservableList<Appt> displayUser = appointmentList.stream()
@@ -257,14 +257,14 @@ public class UserLoginController implements Initializable {
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         
         //pop up an alert box with the appointments in 15 min or no appt
-        if (displayUser == null) {
+        if (displayUser.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setContentText("No Appointments found for: " + dbUserName);
+            alert.setContentText("No Appointments found for: " + dbUserName);
+            alert.showAndWait();
         } else {
             //create a String Builder to concant multiple appointments 
             StringBuilder sb = new StringBuilder();
-            //define a string to hold the appointments
-            String s = "";
+            
             //iterate the list and append all appointments
             for (int count = 0; count < displayUser.size(); count++){
                 sb.append(" Appointment: ");
@@ -275,14 +275,27 @@ public class UserLoginController implements Initializable {
                 sb.append(displayUser.get(count).getStart());
             }
             //make the string for the alert pop up
-            s = sb.toString();
+            //define a string to hold the appointments
+            String s = sb.toString();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setContentText("Appointment" + s + "found for:" + dbUserName);
+            alert.showAndWait();
         }
     }
     
-    private void LogToFile(){
-        
+    private void LogToFile() throws IOException{
+        //Create a log file under the project src/files directory and allow append
+        FileWriter uLogFile = new FileWriter("src/files/C195Mand191_Schedule_App_Log.txt", true);
+        //bing printwriter to the file writer
+        PrintWriter printLogin = new PrintWriter(uLogFile);
+        //print a CR
+        printLogin.println("");
+        //Print the user name and the zoned time of login
+        printLogin.println("User: " + dbUserName + " Logged in at: " + ZonedDateTime.now(myLocationZone));
+        //close the file
+        printLogin.close();
+        //let the watch window know that the file has been written
+        System.out.println("File written");
     }
     
     
