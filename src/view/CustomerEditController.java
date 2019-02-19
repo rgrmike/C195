@@ -6,10 +6,7 @@
 package view;
 
 import java.io.IOException;
-import static model.DBConnection.*;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import model.DBConnection;
 import model.Query;
 import model.Customer;
@@ -30,8 +27,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -200,64 +195,91 @@ public class CustomerEditController implements Initializable {
         Integer fromCustCityId = CustomerEditCityTable.getSelectionModel().getSelectedItem().getCityId();
         String fromCustZip = CustomerEditFieldZip.getText();
         String fromCustPhone = CustomerEditFieldPhone.getText();
-        if (editMe == true){
-            String fromAddressId = selCustomer.getAddressId().toString();
-            try{
-               DBConnection.makeConnection();
-               String sqlSOne ="Update address SET address = " + fromCustAddr + ", address2 = " + fromCustAddr2 + ", cityId = " + fromCustCityId.toString() + ", postalCode = " + fromCustZip + ", phone = " + fromCustPhone + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE addressId = " + fromAddressId;
-                Query.makeQuery(sqlSOne);
-                String sqlSTwo ="Update customer SET customerName =" + fromCustName + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE customerId = " + formCustId;
-                Query.makeQuery(sqlSTwo);
-            }catch (SQLException sqe){
-            //Show SQL connection messages
-            System.out.println("Error: " + sqe.getMessage());
-            } catch (Exception ex) {
-                System.out.println("Delete Code Barfed " + ex.getMessage());
-            }   
-        } else {
-            try {
-                //this is a new customer - we check the DB for the next ID's and insert everything into the DB
-                Integer nextCustomerId = 0;
-                Integer nextAddressId = 0;
-                DBConnection.makeConnection();
-                String sqlStatementOne = "SELECT MAX(customerId) FROM customer ";
-                Query.makeQuery(sqlStatementOne);
-                ResultSet resultOne = Query.getResult();
-                while(resultOne.next()){
-                    nextCustomerId = (resultOne.getInt("customerId") + 1);
-                }
-                String sqlStatementTwo = "SELECT MAX(addressId) FROM address ";
-                Query.makeQuery(sqlStatementTwo);
-                ResultSet resultTwo = Query.getResult();
-                while(resultTwo.next()){
-                    nextAddressId = (resultOne.getInt("addressId") + 1);
-                }
-                
-                String sqlStatementThree ="INSERT INTO address (addressId, address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES ("+ nextAddressId +", "+ fromCustAddr +", " + fromCustAddr2 +", " + fromCustCityId.toString() +", " + fromCustZip +", " + fromCustPhone +", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
-                Query.makeQuery(sqlStatementThree);
-                String sqlStatementFour ="INSERT INTO customer (customerId, customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES (" + nextCustomerId + ", " + fromCustName + ", " + nextAddressId + ", 1, CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ")";
-                Query.makeQuery(sqlStatementFour);
-                
-                DBConnection.closeConnection();
-            } catch (SQLException sqe){
-            //Show SQL connection messages
-            System.out.println("Error: " + sqe.getMessage());
-            } catch (Exception ex) {
-                System.out.println("Delete Code Barfed " + ex.getMessage());
-            }      
+        String errMsg = "noErr";
+        //check for any null fields
+        if (fromCustName == null || fromCustName.isEmpty()){
+            errMsg += "Customer name missing. ";
         }
-        //after saving close the form and go back to calendar
-        Stage stage; 
-            Parent root;
-            //get reference to the button's stage         
-            stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-    }
+        if (fromCustAddr == null || fromCustAddr.isEmpty()){
+            errMsg += "Customer Address missing. ";
+        }
+        if (fromCustZip == null || fromCustZip.isEmpty()){
+            errMsg += "Customer Zip missing. ";
+        } else if (fromCustZip.length() > 10 || fromCustZip.length() < 5){
+            errMsg += "Zip code must be valid. ";
+        }
+        if (fromCustPhone == null || fromCustPhone.isEmpty()){
+            errMsg += "Customer phone missing. ";
+        } else if (fromCustPhone.length() < 10 || fromCustPhone.length() > 15){
+            errMsg += "Phone Number be valid. ";
+        }
+        if (errMsg.equals("noErr")){
+            //if there are no errors found then save the customer data
+            if (editMe == true){
+                String fromAddressId = selCustomer.getAddressId().toString();
+                try{
+                   DBConnection.makeConnection();
+                   String sqlSOne ="Update address SET address = " + fromCustAddr + ", address2 = " + fromCustAddr2 + ", cityId = " + fromCustCityId.toString() + ", postalCode = " + fromCustZip + ", phone = " + fromCustPhone + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE addressId = " + fromAddressId;
+                    Query.makeQuery(sqlSOne);
+                    String sqlSTwo ="Update customer SET customerName =" + fromCustName + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE customerId = " + formCustId;
+                    Query.makeQuery(sqlSTwo);
+                }catch (SQLException sqe){
+                //Show SQL connection messages
+                System.out.println("Error: " + sqe.getMessage());
+                } catch (Exception ex) {
+                    System.out.println("Delete Code Barfed " + ex.getMessage());
+                }   
+            } else {
+                try {
+                    //this is a new customer - we check the DB for the next ID's and insert everything into the DB
+                    Integer nextCustomerId = 0;
+                    Integer nextAddressId = 0;
+                    DBConnection.makeConnection();
+                    String sqlStatementOne = "SELECT MAX(customerId) FROM customer ";
+                    Query.makeQuery(sqlStatementOne);
+                    ResultSet resultOne = Query.getResult();
+                    while(resultOne.next()){
+                        nextCustomerId = (resultOne.getInt("customerId") + 1);
+                    }
+                    String sqlStatementTwo = "SELECT MAX(addressId) FROM address ";
+                    Query.makeQuery(sqlStatementTwo);
+                    ResultSet resultTwo = Query.getResult();
+                    while(resultTwo.next()){
+                        nextAddressId = (resultOne.getInt("addressId") + 1);
+                    }
+
+                    String sqlStatementThree ="INSERT INTO address (addressId, address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES ("+ nextAddressId +", "+ fromCustAddr +", " + fromCustAddr2 +", " + fromCustCityId.toString() +", " + fromCustZip +", " + fromCustPhone +", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
+                    Query.makeQuery(sqlStatementThree);
+                    String sqlStatementFour ="INSERT INTO customer (customerId, customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES (" + nextCustomerId + ", " + fromCustName + ", " + nextAddressId + ", 1, CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ")";
+                    Query.makeQuery(sqlStatementFour);
+
+                    DBConnection.closeConnection();
+                } catch (SQLException sqe){
+                //Show SQL connection messages
+                System.out.println("Error: " + sqe.getMessage());
+                } catch (Exception ex) {
+                    System.out.println("Delete Code Barfed " + ex.getMessage());
+                }      
+            }
+            //after saving close the form and go back to calendar
+            Stage stage; 
+                Parent root;
+                //get reference to the button's stage         
+                stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
+                //load up OTHER FXML document
+                root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
+                //create a new scene with root and set the stage
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+        } else {
+            //if errors on the form are found then report what they are
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Form Error");
+            alert.setContentText(errMsg);
+            alert.showAndWait();
+        }
+        }
 
     @FXML
     private void CustomerEditRemoveButtonHandler(ActionEvent event) {
@@ -316,6 +338,7 @@ public class CustomerEditController implements Initializable {
             stage.show();
         }
     }
+
 
     @FXML
     private void CustomerEditFieldAddrHandler(ActionEvent event) {
