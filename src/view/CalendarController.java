@@ -269,6 +269,8 @@ public class CalendarController implements Initializable {
             alert.setContentText("Click an Appointment to delete");
             alert.showAndWait();
         }
+        //after deleting the record update the observable list and re-populate the data
+        TableFill();
     }
 
     @FXML

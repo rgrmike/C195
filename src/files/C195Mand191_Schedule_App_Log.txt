@@ -6,3 +6,13 @@ User: user1 Logged in at: 2019-02-18T18:30:42.605-08:00[America/Los_Angeles]
 User: user1 Logged in at: 2019-02-18T18:31:56.252-08:00[America/Los_Angeles]
 
 User: user1 Logged in at: 2019-02-18T18:34:01.886-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-20T11:40:03.893-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-20T11:46:05.635-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-20T11:48:58.809-08:00[America/Los_Angeles]
+
+User: user2 Logged in at: 2019-02-20T11:54:59.510-08:00[America/Los_Angeles]
+
+User: user2 Logged in at: 2019-02-20T11:58:53.898-08:00[America/Los_Angeles]
