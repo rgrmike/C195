@@ -31,6 +31,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import model.Appt;
@@ -51,8 +52,6 @@ public class UserLoginController implements Initializable {
     @FXML
     private TextField UserLoginUserNameField;
     @FXML
-    private TextField UserLoginPasswordField;
-    @FXML
     private Button UserLoginSigninButton;
     @FXML
     private Label UserLoginErrorLabel;
@@ -68,6 +67,14 @@ public class UserLoginController implements Initializable {
     private String dbUserPw = null;
     private String localUserPW = null;
     private String localUserName = null;
+    @FXML
+    private Label UserLoginUserNameLabel;
+    @FXML
+    private Label UserLoginPasswordLabel;
+    @FXML
+    private Label UserLoginTitleLabel;
+    @FXML
+    private PasswordField UserLoginPwField;
 
     /**
      * Initializes the controller class.
@@ -76,6 +83,30 @@ public class UserLoginController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        //set all form buttons to spanish or russian based on local
+        if (myLocale.getLanguage().equals("Russian")){
+                //Translate buttons to russian
+                UserLoginTitleLabel.setText("ЗаПланировать логин");
+                UserLoginUserNameLabel.setText("Имя пользователя:");
+                UserLoginPasswordLabel.setText("Пароль:");
+                UserLoginSigninButton.setText("Войти");
+                UserLoginExitButton.setText("Exit");
+            } else if(myLocale.getLanguage().equals("Spanish")){
+                //translate buttons to spanish
+                UserLoginTitleLabel.setText("Programar inicio de sesión");
+                UserLoginUserNameLabel.setText("Nombre de usuario:");
+                UserLoginPasswordLabel.setText("Contraseña:");
+                UserLoginSigninButton.setText("Inicia sesión");
+                UserLoginExitButton.setText("Salida");
+            } else {
+                //make sure that buttons are in english by default
+                UserLoginTitleLabel.setText("Schedule Login");
+                UserLoginUserNameLabel.setText("User Name:");
+                UserLoginPasswordLabel.setText("Password:");
+                UserLoginSigninButton.setText("Sign In");
+                UserLoginExitButton.setText("Exit");
+            }
         try {
             DBConnection.makeConnection();
             //Create Statement object
@@ -142,7 +173,7 @@ public class UserLoginController implements Initializable {
     private void UserLoginSigninButtonHandler(ActionEvent event) throws IOException {
         //check for empty fields
         localUserName = UserLoginUserNameField.getText();
-        localUserPW = UserLoginPasswordField.getText();
+        localUserPW = UserLoginPwField.getText();
         System.out.println("my locale= " + myLocale);
         try {
             DBConnection.makeConnection();
@@ -186,8 +217,8 @@ public class UserLoginController implements Initializable {
             if (myLocale.getLanguage().equals("Russian")){
                 //Translate error to Russian
                 UserLoginErrorLabel.setText("Пользователя " + localUserName + " не найден");
-            } else if(myLocale.getLanguage().equals("English")){
-                UserLoginErrorLabel.setText("User: " + localUserName + " Not Found");
+            } else if(myLocale.getLanguage().equals("Spanish")){
+                UserLoginErrorLabel.setText("Usuario: " + localUserName + " No encontrado");
             } else {
                 UserLoginErrorLabel.setText("User: " + localUserName + " Not Found");
             }
@@ -199,8 +230,8 @@ public class UserLoginController implements Initializable {
                 if (myLocale.getLanguage().equals("Russian")){
                 //Translate error to Russian
                     UserLoginErrorLabel.setText("Приветствовать!");
-                } else if(myLocale.getLanguage().equals("English")){
-                    UserLoginErrorLabel.setText("Welcome!");
+                } else if(myLocale.getLanguage().equals("Spanish")){
+                    UserLoginErrorLabel.setText("Bienvenido!");
                 } else {
                     UserLoginErrorLabel.setText("Welcome!");
                 }
