@@ -221,9 +221,9 @@ public class CustomerEditController implements Initializable {
                 String fromAddressId = selCustomer.getAddressId().toString();
                 try{
                    DBConnection.makeConnection();
-                   String sqlSOne ="Update address SET address = " + fromCustAddr + ", address2 = " + fromCustAddr2 + ", cityId = " + fromCustCityId.toString() + ", postalCode = " + fromCustZip + ", phone = " + fromCustPhone + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE addressId = " + fromAddressId;
+                   String sqlSOne ="Update address SET address = '" + fromCustAddr + "', address2 = '" + fromCustAddr2 + "', cityId = " + fromCustCityId.toString() + ", postalCode = '" + fromCustZip + "', phone = '" + fromCustPhone + "', lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = '" + currentRepo.getrepoUserName() + "' WHERE addressId = " + fromAddressId;
                     Query.makeQuery(sqlSOne);
-                    String sqlSTwo ="Update customer SET customerName =" + fromCustName + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE customerId = " + formCustId;
+                    String sqlSTwo ="Update customer SET customerName ='" + fromCustName + "', lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = '" + currentRepo.getrepoUserName() + "' WHERE customerId = " + formCustId;
                     Query.makeQuery(sqlSTwo);
                 }catch (SQLException sqe){
                     //Show SQL connection messages
@@ -250,9 +250,9 @@ public class CustomerEditController implements Initializable {
                         nextAddressId = (resultOne.getInt("addressId") + 1);
                     }
 
-                    String sqlStatementThree ="INSERT INTO address (addressId, address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES ("+ nextAddressId +", "+ fromCustAddr +", " + fromCustAddr2 +", " + fromCustCityId.toString() +", " + fromCustZip +", " + fromCustPhone +", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
+                    String sqlStatementThree ="INSERT INTO address (addressId, address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES ("+ nextAddressId +", '"+ fromCustAddr +"', '" + fromCustAddr2 +"', " + fromCustCityId.toString() +", '" + fromCustZip +"', '" + fromCustPhone +"', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() +"')";
                     Query.makeQuery(sqlStatementThree);
-                    String sqlStatementFour ="INSERT INTO customer (customerId, customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES (" + nextCustomerId + ", " + fromCustName + ", " + nextAddressId + ", 1, CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP, " + currentRepo.getrepoUserName() + ")";
+                    String sqlStatementFour ="INSERT INTO customer (customerId, customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES (" + nextCustomerId + ", '" + fromCustName + "', " + nextAddressId + ", 1, CURRENT_TIMESTAMP, '" + currentRepo.getrepoUserName() + "', CURRENT_TIMESTAMP, '" + currentRepo.getrepoUserName() + "')";
                     Query.makeQuery(sqlStatementFour);
 
                     DBConnection.closeConnection();
