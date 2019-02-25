@@ -10,21 +10,14 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -90,12 +83,12 @@ public class CalendarController implements Initializable {
     //intitalize the observable list as an array list - otherwise populating the list with appt will barf
     
     ObservableList<Appt> appointmentList = FXCollections.observableArrayList();
-    
+    private Repo currentRepo;
     String qContents = null;
     ZoneId locationHolder;
     ZoneId myLocationZone = ZoneId.systemDefault();
     //used to pass which button is pressed eidit or new
-    private Repo currentRepo;
+    
     
     /**
      * Initializes the controller class.
@@ -109,7 +102,11 @@ public class CalendarController implements Initializable {
        
         
     }    
-
+    
+    public void setRepo(Repo moveRepo){
+        this.currentRepo = moveRepo;
+    }
+    
     private void TableFill() {
         try {
             DBConnection.makeConnection();
@@ -280,16 +277,19 @@ public class CalendarController implements Initializable {
     currentRepo.setrepoSelectEditApt(selEditApt);
     if (selEditApt != null) {
         currentRepo.setrepoIsEdit(true);
-        Stage stage; 
-        Parent root;
+        Stage stage;
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ApptEdit.fxml"));     
+        Parent root = (Parent)fxmlLoader.load();          
+        //initialize the ApptEditController page as an fxml loader so we can pass values
+        ApptEditController controller;
+            controller = fxmlLoader.<ApptEditController>getController();
+        //send the repo class to CalendarController
+        controller.setRepo(currentRepo);
+        Scene scene = new Scene(root); 
         stage=(Stage) CalendarEditButton.getScene().getWindow();
-        //load up OTHER FXML document
-        root = FXMLLoader.load(getClass().getResource("ApptEdit.fxml"));
-        //create a new scene with root and set the stage
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
-            
+        stage.setScene(scene);    
+        stage.show();   
+                    
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setHeaderText("Nothing Selected");
@@ -302,24 +302,37 @@ public class CalendarController implements Initializable {
     private void CalendarNewButtonHandler(ActionEvent event) throws IOException {
         //make sure we tell the appt edit form that we are making a new appt and not editing an existing one
         //Each time the new button is executed it sets false
-        currentRepo.setrepoIsEdit(true);
+        currentRepo.setrepoIsEdit(false);
         //open the calendar page
-        //get reference to the button's stage         
-        Stage stage; 
+        /*Stage stage; 
         Parent root;
         stage=(Stage) CalendarNewButton.getScene().getWindow();
         //load up OTHER FXML document
+        //root = FXMLLoader.load(getClass().getResource("Reports.fxml"));
         root = FXMLLoader.load(getClass().getResource("ApptEdit.fxml"));
         //create a new scene with root and set the stage
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.show();
+        stage.show(); */
+        Stage stage;
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ApptEdit.fxml"));     
+        Parent root = (Parent)fxmlLoader.load();          
+        //initialize the ApptEditController page as an fxml loader so we can pass values
+        ApptEditController controller;
+            controller = fxmlLoader.<ApptEditController>getController();
+        //send the repo class to CalendarController
+        controller.setRepo(currentRepo);
+        Scene scene = new Scene(root); 
+        stage=(Stage) CalendarNewButton.getScene().getWindow();
+        stage.setScene(scene);    
+        stage.show();  
     }
 
     @FXML
     private void CalendarCustomersButtonHandler(ActionEvent event) throws IOException {
             //open the calendar page
             //get reference to the button's stage         
+            /*
             Stage stage; 
             Parent root;
             stage=(Stage) CalendarCustomersButton.getScene().getWindow();
@@ -328,7 +341,19 @@ public class CalendarController implements Initializable {
             //create a new scene with root and set the stage
             Scene scene = new Scene(root);
             stage.setScene(scene);
-            stage.show();
+            stage.show(); */
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("CustomerEdit.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the ApptEditController page as an fxml loader so we can pass values
+            CustomerEditController controller;
+                controller = fxmlLoader.<CustomerEditController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(currentRepo);
+            Scene scene = new Scene(root); 
+            stage=(Stage) CalendarCustomersButton.getScene().getWindow();
+            stage.setScene(scene);    
+            stage.show();  
     }
 
     @FXML

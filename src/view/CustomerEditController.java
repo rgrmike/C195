@@ -136,6 +136,10 @@ public class CustomerEditController implements Initializable {
         CustomerEditCityTable.getItems().setAll(cityList);
     }
 
+    public void setRepo(Repo moveRepo){
+        this.currentRepo = moveRepo;
+    }
+    
     @FXML
     private void CustomerEditFieldIDHandler(ActionEvent event) {
     }

@@ -16,3 +16,47 @@ User: user1 Logged in at: 2019-02-20T11:48:58.809-08:00[America/Los_Angeles]
 User: user2 Logged in at: 2019-02-20T11:54:59.510-08:00[America/Los_Angeles]
 
 User: user2 Logged in at: 2019-02-20T11:58:53.898-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T12:06:20.386-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T12:11:32.712-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T12:15:55.165-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T12:18:12.079-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T15:42:44.992-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T15:44:40.989-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T15:47:33.220-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T15:50:16.296-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:15:38.373-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:18:27.526-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:20:06.180-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:21:31.131-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:24:45.642-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:27:36.960-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:28:05.888-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:30:38.664-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:31:40.437-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:32:32.436-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:36:02.160-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T16:37:17.227-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T18:03:48.038-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T18:06:25.022-08:00[America/Los_Angeles]

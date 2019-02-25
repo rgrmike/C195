@@ -10,10 +10,12 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -110,6 +112,16 @@ public class ReportsController implements Initializable {
                 monthList.add(thisMonth);
                 
             }
+            
+            DBConnection.closeConnection();
+        } catch (SQLException sqe){
+            //Show SQL connection messages
+            System.out.println("Error: " + sqe.getMessage());
+        } catch (Exception ex) {
+            System.out.println("Code Barfed " + ex.getMessage());
+        }
+        try {
+            DBConnection.makeConnection();
             String sqlTwo = "SELECT appointment.title, appointment.location, appointment.start, appointment.end, appointment.contact, appointment.customerID, customer.customerName, appointment.description, appointment.appointmentID FROM appointment INNER JOIN customer ON appointment.customerId=customer.customerId";
             Query.makeQuery(sqlTwo);
             ResultSet r2 = Query.getResult();
@@ -136,20 +148,31 @@ public class ReportsController implements Initializable {
                 ZonedDateTime transitEndTime = localZoneApptEnd.withZoneSameInstant(myLocationZone);
                 String dbApptEnd = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitEndTime);
                 String dbApptContact = r2.getString("appointment.contact");
-                Customer dbCustomer = new Customer(result.getInt("appointment.customerID"),result.getString("customer.customerName"));
+                Customer dbCustomer = new Customer(r2.getInt("appointment.customerID"),r2.getString("customer.customerName"));
                 String dbDescription = r2.getString("appointment.description");
                 Integer DBApptID = r2.getInt("appointment.appointmentID");
                 Appt apptRpt = new Appt(DBApptID, dbApptTitle, dbApptStart, dbApptEnd, dbApptContact, dbCustomer, dbDescription, dbApptLocation);
                 apptReportList.add(apptRpt);
+            }
+            
+            DBConnection.closeConnection();
+        } catch (SQLException sqe){
+            //Show SQL connection messages
+            System.out.println("Error: " + sqe.getMessage());
+        } catch (Exception ex) {
+            System.out.println("Code Barfed " + ex.getMessage());
+        }
                 
-                String sqlThree = "SELECT userName from user";
+        try {
+            DBConnection.makeConnection();
+            String sqlThree = "SELECT userName from user";
             Query.makeQuery(sqlThree);
             ResultSet resultThree = Query.getResult();
             while(resultThree.next()){
-                String dbUsrName = result.getString("userName");
+                String dbUsrName = resultThree.getString("userName");
                 apptUserList.add(dbUsrName);
             }
-            }
+            
             DBConnection.closeConnection();
         } catch (SQLException sqe){
             //Show SQL connection messages
@@ -172,6 +195,7 @@ public class ReportsController implements Initializable {
         ReportApptCol.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
         ReportTable.getItems().setAll(apptReportList);
         ReportConsultantPicker.setItems(apptUserList);
+        System.out.println(apptUserList.toString() + "Loaded Users into User List.");
     }    
 
     @FXML
@@ -194,9 +218,13 @@ public class ReportsController implements Initializable {
         
         //grab the contents of the date tool
         LocalDate pickDate = ReportDatePicker.getValue();
+        //ZonedDateTime dbUpdateZOneEnd = ZonedDateTime.of(dbUpdateDate, dbUpdateEndTime, saveLocationZone).withZoneSameInstant(saveLocationHolder);
+        
         //lamda stream to compare date from the date picker to all of the appts
+        //todo figure out how to extract date from zoned date time
+        
         displayDate = apptReportList.stream()
-                .filter(p -> LocalDate.parse(p.getStart()).isEqual(pickDate))
+                .filter(p -> LocalDate.from(ZonedDateTime.parse(p.getStart())).isEqual(pickDate))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         
         //set the table view to display the filtered list

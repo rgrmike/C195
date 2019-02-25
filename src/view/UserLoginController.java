@@ -25,6 +25,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -39,6 +40,7 @@ import model.Customer;
 import model.DBConnection;
 import model.Query;
 import model.Repo;
+//import view.CalendarController;
 
 /**
  * FXML Controller class
@@ -47,7 +49,7 @@ import model.Repo;
  */
 public class UserLoginController implements Initializable {
 
-    Repo repo = new Repo();
+    private static Repo repo = new Repo();
     private final Locale myLocale = Locale.getDefault();
     @FXML
     private TextField UserLoginUserNameField;
@@ -241,15 +243,20 @@ public class UserLoginController implements Initializable {
             Remind();
             //open the calendar page
             //get reference to the button's stage         
-            Stage stage; 
-            Parent root;
+          
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the CalendarController page as an fxml loader so we can pass values
+            CalendarController controller;
+                controller = fxmlLoader.<CalendarController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(repo);
+            Scene scene = new Scene(root); 
             stage=(Stage) UserLoginSigninButton.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            stage.setScene(scene);    
+            stage.show();   
+            
             } else {
                 //bad password - set the error box to bad password
                 if (myLocale.getLanguage().equals("Russian")){

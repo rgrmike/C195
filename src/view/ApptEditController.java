@@ -86,6 +86,8 @@ public class ApptEditController implements Initializable {
     
     /**
      * Initializes the controller class.
+     * @param url
+     * @param rb
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -121,7 +123,11 @@ public class ApptEditController implements Initializable {
             ApptEditLocation.setValue(transfer.getLocation());
         }
     } 
-
+    
+    public void setRepo(Repo moveRepo){
+        this.currentRepo = moveRepo;
+    }
+    
     private void custTableFill (){
         // Populate custList
         try {
@@ -146,7 +152,9 @@ public class ApptEditController implements Initializable {
                 System.out.println("Created appt " + cust.getCustomerName());
                 custList.add(cust);               
             }
+            DBConnection.closeConnection();
             
+            DBConnection.makeConnection();
             String sqltwo = "SELECT userName from user";
             Query.makeQuery(sqltwo);
             ResultSet resulttwo = Query.getResult();
