@@ -200,7 +200,7 @@ public class ApptEditController implements Initializable {
         }
          if (dbUpdateLocation == null || dbUpdateLocation.isEmpty()){
             errorMsg += "Please enter Location. ";
-        } else if (dbUpdateEndTime.equals(dbUpdateEndTime) || dbUpdateEndTime.isBefore(dbUpdateStartTime)){
+        } else if (dbUpdateEndTime.equals(dbUpdateStartTime) || dbUpdateEndTime.isBefore(dbUpdateStartTime)){
             errorMsg += "The Appointment End time must be after the start time. ";
         }
         //if the error is blank then run the Save code
@@ -240,7 +240,7 @@ public class ApptEditController implements Initializable {
                     //if isEdit is true then we are updating an existing record
                     try {
                         DBConnection.makeConnection();
-                        String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = " + dbUpdateTitle + ", description = " + dbUpdateDesc + ", location = " + dbUpdateLocation + ", contact = "+ dbUpdateContact +",start = "+ dbUStart +", end = "+ dbUEnd +", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy =" + currentRepo.getrepoUserName() + " WERE appointmentId = " + dbApptId;
+                        String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = '" + dbUpdateTitle + "', description = '" + dbUpdateDesc + "', location = '" + dbUpdateLocation + "', contact = '"+ dbUpdateContact +"',start = '"+ dbUStart +"', end = '"+ dbUEnd +"', lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy ='" + currentRepo.getrepoUserName() + "' WHERE appointmentId = " + dbApptId;
                         Query.makeQuery(sqlStatement);
                         ResultSet result = Query.getResult();
                         System.out.println(result);
@@ -278,7 +278,7 @@ public class ApptEditController implements Initializable {
                         //increment the appointmentId by 1
                         newMaxApptId = dbMaxApptId +1;
                         //replace admin with user from user class
-                        String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", " + dbUpdateTitle + ", " + dbUpdateDesc + ", " + dbUpdateLocation + ", " + dbUpdateContact + ", " + dbUStart + ", " + dbUEnd + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() + ", CURRENT_TIMESTAMP," + currentRepo.getrepoUserName() +")";
+                        String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", '" + dbUpdateTitle + "', '" + dbUpdateDesc + "', '" + dbUpdateLocation + "', '" + dbUpdateContact + "', '" + dbUStart + "', '" + dbUEnd + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() +"')";
                         Query.makeQuery(sqlStatementtwo);
                         ResultSet resulttwo = Query.getResult();
                         }
@@ -326,7 +326,7 @@ public class ApptEditController implements Initializable {
         
         try {
                     DBConnection.makeConnection();
-                    String sqlCheckConflict = "SELECT * FROM appointment WHERE (" + checkStart + " BETWEEN start AND end OR " + checkEnd + " BETWEEN start AND end) AND appointmentID != " + dbAppointmentId;
+                    String sqlCheckConflict = "SELECT * FROM appointment WHERE ('" + checkStart + "' BETWEEN start AND end OR '" + checkEnd + "' BETWEEN start AND end) AND appointmentID != " + dbAppointmentId;
                     Query.makeQuery(sqlCheckConflict);
                     ResultSet resultCheckConflict = Query.getResult();
                     if (resultCheckConflict.next()){
