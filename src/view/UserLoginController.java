@@ -154,11 +154,9 @@ public class UserLoginController implements Initializable {
                 String dbDescription = result.getString("appointment.description");
                 Integer DBApptID = result.getInt("appointment.appointmentID");
                 Appt appt = new Appt(DBApptID, dbApptTitle, dbApptStart, dbApptEnd, dbApptContact, dbCustomer, dbDescription, dbApptLocation);
-                //debug messages to let us know when a new Appt is created
-                System.out.println("Created appt " + appt.getAppointmentTitle());
                 //add the array to the observable list
                 appointmentList.add(appt);
-                System.out.println("Added AppointmentList");
+                
                 
         }
         DBConnection.closeConnection();
@@ -194,16 +192,9 @@ public class UserLoginController implements Initializable {
             while(result.next()){
             dbUserID = result.getInt("userID");
             repo.setrepoUserId(dbUserID);
-            //Debug - Print UserID
-            System.out.print(dbUserID + ", ");
             dbUserName = result.getString("userName");
             repo.setrepoUserName(dbUserName);
-            //Debug - Print UserID
-            System.out.print(dbUserName + ", ");
             dbUserPw = result.getString("password");
-            //Debug - Print UserID
-            System.out.println(dbUserPw);
-            
         }
         
         DBConnection.closeConnection();
@@ -332,8 +323,7 @@ public class UserLoginController implements Initializable {
         printLogin.println("User: " + dbUserName + " Logged in at: " + ZonedDateTime.now(myLocationZone));
         //close the file
         printLogin.close();
-        //let the watch window know that the file has been written
-        System.out.println("File written");
+
     }
     
     

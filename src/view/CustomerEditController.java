@@ -93,7 +93,6 @@ public class CustomerEditController implements Initializable {
             String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, a.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.cityId JOIN country t ON y.countryId = t.countryId";
             Query.makeQuery(sqlStatement);
             ResultSet result = Query.getResult();
-            System.out.println(result);
             while(result.next()){
                 Integer dbCustID = result.getInt("c.customerId");
                 String dbCustName = result.getString("c.customerName");
@@ -111,7 +110,6 @@ public class CustomerEditController implements Initializable {
             String sqltwo = "SELECT y.cityId, y.city FROM city y";
             Query.makeQuery(sqltwo);
             ResultSet resultTwo = Query.getResult();
-            System.out.println(resultTwo);
             while(resultTwo.next()){
                 Integer dbPopCityId = resultTwo.getInt("y.cityId");
                 String dbPopCity = resultTwo.getString("y.city");
@@ -228,8 +226,8 @@ public class CustomerEditController implements Initializable {
                     String sqlSTwo ="Update customer SET customerName =" + fromCustName + ", lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy = " + currentRepo.getrepoUserName() + " WHERE customerId = " + formCustId;
                     Query.makeQuery(sqlSTwo);
                 }catch (SQLException sqe){
-                //Show SQL connection messages
-                System.out.println("Error: " + sqe.getMessage());
+                    //Show SQL connection messages
+                    System.out.println("Error: " + sqe.getMessage());
                 } catch (Exception ex) {
                     System.out.println("Delete Code Barfed " + ex.getMessage());
                 }   
@@ -260,22 +258,25 @@ public class CustomerEditController implements Initializable {
                     DBConnection.closeConnection();
                 } catch (SQLException sqe){
                 //Show SQL connection messages
-                System.out.println("Error: " + sqe.getMessage());
+                    System.out.println("Error: " + sqe.getMessage());
                 } catch (Exception ex) {
                     System.out.println("Delete Code Barfed " + ex.getMessage());
                 }      
             }
             //after saving close the form and go back to calendar
-            Stage stage; 
-                Parent root;
-                //get reference to the button's stage         
-                stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
-                //load up OTHER FXML document
-                root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
-                //create a new scene with root and set the stage
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show();
+            //make sure we pass repo back to the calendar form           
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the ApptEditController page as an fxml loader so we can pass values
+            CalendarController controller;
+                controller = fxmlLoader.<CalendarController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(currentRepo);
+            Scene scene = new Scene(root); 
+            stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
+            stage.setScene(scene);    
+            stage.show(); 
         } else {
             //if errors on the form are found then report what they are
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -330,16 +331,21 @@ public class CustomerEditController implements Initializable {
         Optional<ButtonType> x = alert.showAndWait();
         //if the user clicks ok then go ahead and load the main screen
         if (x.get() == ButtonType.OK) {
-            Stage stage; 
-            Parent root;
-            //get reference to the button's stage         
+                  
+            
+            //make sure we pass repo back to the calendar form           
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the ApptEditController page as an fxml loader so we can pass values
+            CalendarController controller;
+                controller = fxmlLoader.<CalendarController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(currentRepo);
+            Scene scene = new Scene(root); 
             stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            stage.setScene(scene);    
+            stage.show(); 
         }
     }
 

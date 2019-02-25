@@ -60,3 +60,19 @@ User: user1 Logged in at: 2019-02-24T16:37:17.227-08:00[America/Los_Angeles]
 User: user1 Logged in at: 2019-02-24T18:03:48.038-08:00[America/Los_Angeles]
 
 User: user1 Logged in at: 2019-02-24T18:06:25.022-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T18:51:28.587-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T18:52:19.805-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T18:56:58.516-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T18:58:13.627-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T19:05:13.761-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T19:07:26.534-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T19:10:40.239-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-24T19:19:49.634-08:00[America/Los_Angeles]

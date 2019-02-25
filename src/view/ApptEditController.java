@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -108,7 +109,8 @@ public class ApptEditController implements Initializable {
         apptEndList.addAll("09:00:00","10:00:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00");
         ApptEditEnd.setItems(apptEndList);
         ApptEditEnd.getSelectionModel().select(0);
-        
+        //wait for the form to fully load before trying to check the repo class to prevent null pointer exception
+        Platform.runLater(() -> {
         if(currentRepo.getrepoIsEdit()==true){
             //if isEdit is true then grab the selected appointment and populate the list
             Appt transfer = currentRepo.getRepoSelectEditApt();
@@ -122,6 +124,8 @@ public class ApptEditController implements Initializable {
             ApptEditEnd.setValue(ZonedDateTime.parse(transfer.getEnd()).toLocalTime().toString());
             ApptEditLocation.setValue(transfer.getLocation());
         }
+        }
+        );
     } 
     
     public void setRepo(Repo moveRepo){
@@ -134,32 +138,27 @@ public class ApptEditController implements Initializable {
             DBConnection.makeConnection();
             String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, a.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.cityId JOIN country t ON y.countryId = t.countryId";
             Query.makeQuery(sqlStatement);
-            ResultSet result = Query.getResult();
-            System.out.println(result);
-            while(result.next()){
-                Integer dbCustID = result.getInt("c.customerId");
-                String dbCustName = result.getString("c.customerName");
-                Integer dbAddressId = result.getInt("a.addressId");
-                String dbAddress = result.getString("a.address");
-                String dbAddress2 = result.getString("a.address2");
-                Integer dbCityId = result.getInt("a.cityId");
-                String dbCity = result.getString("y.city");
-                String dbCountry = result.getString("t.country");
-                String dbPost = result.getString("a.postalCode");
-                String dbPhone = result.getString("a.phone");
+            ResultSet resultOne = Query.getResult();
+            while(resultOne.next()){
+                Integer dbCustID = resultOne.getInt("c.customerId");
+                String dbCustName = resultOne.getString("c.customerName");
+                Integer dbAddressId = resultOne.getInt("a.addressId");
+                String dbAddress = resultOne.getString("a.address");
+                String dbAddress2 = resultOne.getString("a.address2");
+                Integer dbCityId = resultOne.getInt("a.cityId");
+                String dbCity = resultOne.getString("y.city");
+                String dbCountry = resultOne.getString("t.country");
+                String dbPost = resultOne.getString("a.postalCode");
+                String dbPhone = resultOne.getString("a.phone");
                 Customer cust = new Customer(dbCustID, dbCustName, dbAddressId, dbAddress, dbAddress2, dbCityId, dbCity, dbCountry, dbPost, dbPhone);
-                //debug message
-                System.out.println("Created appt " + cust.getCustomerName());
                 custList.add(cust);               
             }
-            DBConnection.closeConnection();
             
-            DBConnection.makeConnection();
             String sqltwo = "SELECT userName from user";
             Query.makeQuery(sqltwo);
             ResultSet resulttwo = Query.getResult();
             while(resulttwo.next()){
-                String dbUsrName = result.getString("userName");
+                String dbUsrName = resulttwo.getString("userName");
                 apptUserList.add(dbUsrName);
                 
             }
@@ -178,7 +177,7 @@ public class ApptEditController implements Initializable {
     }
 
     @FXML
-    private void ApptEditSaveHandler(ActionEvent event) {
+    private void ApptEditSaveHandler(ActionEvent event) throws IOException {
         //grab the values from the form
         String errorMsg = "";
         String dbUpdateCustId = ApptEditCustTable.getSelectionModel().getSelectedItem().getCustomerId().toString();
@@ -252,6 +251,19 @@ public class ApptEditController implements Initializable {
                     } catch (Exception ex) {
                         System.out.println("Code Barfed " + ex.getMessage());
                     }
+                    //make sure we pass repo back to the calendar form           
+                    Stage stage;
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+                    Parent root = (Parent)fxmlLoader.load();          
+                    //initialize the ApptEditController page as an fxml loader so we can pass values
+                    CalendarController controller;
+                        controller = fxmlLoader.<CalendarController>getController();
+                    //send the repo class to CalendarController
+                    controller.setRepo(currentRepo);
+                    Scene scene = new Scene(root); 
+                    stage=(Stage) ApptEditCancel.getScene().getWindow();
+                    stage.setScene(scene);    
+                    stage.show(); 
                 }else{
                     //this is a new appointment so we are going to insert it into the apppointments table
                     //first grab the last appointmentId from the database
@@ -276,6 +288,19 @@ public class ApptEditController implements Initializable {
                     }   catch (Exception ex) {
                         System.out.println("Code Barfed " + ex.getMessage());
                     }
+                    //make sure we pass repo back to the calendar form           
+                    Stage stage;
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+                    Parent root = (Parent)fxmlLoader.load();          
+                    //initialize the ApptEditController page as an fxml loader so we can pass values
+                    CalendarController controller;
+                        controller = fxmlLoader.<CalendarController>getController();
+                    //send the repo class to CalendarController
+                    controller.setRepo(currentRepo);
+                    Scene scene = new Scene(root); 
+                    stage=(Stage) ApptEditCancel.getScene().getWindow();
+                    stage.setScene(scene);    
+                    stage.show(); 
                 }
             }
         } else {
@@ -328,16 +353,19 @@ public class ApptEditController implements Initializable {
         Optional<ButtonType> x = alert.showAndWait();
         //if the user clicks ok then go ahead and load the main screen
         if (x.get() == ButtonType.OK) {
-            Stage stage; 
-            Parent root;
-            //get reference to the button's stage         
-            stage=(Stage) ApptEditCancel.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            //make sure we pass repo back to the calendar form           
+            Stage stage;
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+        Parent root = (Parent)fxmlLoader.load();          
+        //initialize the ApptEditController page as an fxml loader so we can pass values
+        CalendarController controller;
+            controller = fxmlLoader.<CalendarController>getController();
+        //send the repo class to CalendarController
+        controller.setRepo(currentRepo);
+        Scene scene = new Scene(root); 
+        stage=(Stage) ApptEditCancel.getScene().getWindow();
+        stage.setScene(scene);    
+        stage.show(); 
         }
     }
     

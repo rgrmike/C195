@@ -112,7 +112,6 @@ public class CalendarController implements Initializable {
             DBConnection.makeConnection();
             //Create Statement object
             String sqlStatement = "SELECT appointment.title, appointment.location, appointment.start, appointment.end, appointment.contact, appointment.customerID, customer.customerName, appointment.description, appointment.appointmentID FROM appointment INNER JOIN customer ON appointment.customerId=customer.customerId";
-  
             //use Query class to check sql statement for type of query
             Query.makeQuery(sqlStatement);
             //Execute Statement and Create ResultSet object
@@ -143,23 +142,18 @@ public class CalendarController implements Initializable {
                 ZonedDateTime transitStartTime = localZoneApptStart.withZoneSameInstant(myLocationZone);
                 //Convert the local time zone to a string to store in 
                 String dbApptStart = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitStartTime);
-                
                 //Grab the appt end - convert to local time zone and string
                 Timestamp localApptEnd = result.getTimestamp("appointment.end");
                 ZonedDateTime localZoneApptEnd = ZonedDateTime.ofInstant(localApptEnd.toInstant(), locationHolder);
                 ZonedDateTime transitEndTime = localZoneApptEnd.withZoneSameInstant(myLocationZone);
                 String dbApptEnd = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitEndTime);
-
                 String dbApptContact = result.getString("appointment.contact");
                 Customer dbCustomer = new Customer(result.getInt("appointment.customerID"),result.getString("customer.customerName"));
                 String dbDescription = result.getString("appointment.description");
                 Integer DBApptID = result.getInt("appointment.appointmentID");
                 Appt appt = new Appt(DBApptID, dbApptTitle, dbApptStart, dbApptEnd, dbApptContact, dbCustomer, dbDescription, dbApptLocation);
-                //debug messages to let us know when a new Appt is created
-                System.out.println("Created appt " + appt.getAppointmentTitle());
                 //add the array to the observable list
                 appointmentList.add(appt);
-                System.out.println("Added AppointmentList");
                 
         }
         DBConnection.closeConnection();
@@ -303,17 +297,7 @@ public class CalendarController implements Initializable {
         //make sure we tell the appt edit form that we are making a new appt and not editing an existing one
         //Each time the new button is executed it sets false
         currentRepo.setrepoIsEdit(false);
-        //open the calendar page
-        /*Stage stage; 
-        Parent root;
-        stage=(Stage) CalendarNewButton.getScene().getWindow();
-        //load up OTHER FXML document
-        //root = FXMLLoader.load(getClass().getResource("Reports.fxml"));
-        root = FXMLLoader.load(getClass().getResource("ApptEdit.fxml"));
-        //create a new scene with root and set the stage
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show(); */
+        //open the appt edit page page
         Stage stage;
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ApptEdit.fxml"));     
         Parent root = (Parent)fxmlLoader.load();          
@@ -332,16 +316,7 @@ public class CalendarController implements Initializable {
     private void CalendarCustomersButtonHandler(ActionEvent event) throws IOException {
             //open the calendar page
             //get reference to the button's stage         
-            /*
-            Stage stage; 
-            Parent root;
-            stage=(Stage) CalendarCustomersButton.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("CustomerEdit.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show(); */
+            
             Stage stage;
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("CustomerEdit.fxml"));     
             Parent root = (Parent)fxmlLoader.load();          
