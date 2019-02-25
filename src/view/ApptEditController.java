@@ -123,6 +123,7 @@ public class ApptEditController implements Initializable {
             ApptEditStart.setValue(ZonedDateTime.parse(transfer.getStart()).toLocalTime().toString());
             ApptEditEnd.setValue(ZonedDateTime.parse(transfer.getEnd()).toLocalTime().toString());
             ApptEditLocation.setValue(transfer.getLocation());
+            ApptEditContact.setValue(transfer.getContact());
         }
         }
         );

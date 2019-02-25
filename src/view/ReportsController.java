@@ -198,6 +198,10 @@ public class ReportsController implements Initializable {
         System.out.println(apptUserList.toString() + "Loaded Users into User List.");
     }    
 
+    public void setRepo(Repo moveRepo){
+        this.currentRepo = moveRepo;
+    }
+    
     @FXML
     private void ReportConsultantPickerHandler(ActionEvent event) {
         String userHolder = ReportConsultantPicker.getValue();
@@ -244,16 +248,19 @@ public class ReportsController implements Initializable {
         Optional<ButtonType> x = alert.showAndWait();
         //if the user clicks ok then go ahead and load the main screen
         if (x.get() == ButtonType.OK) {
-            Stage stage; 
-            Parent root;
-            //get reference to the button's stage         
+            //pass repo back to calendar form
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the ApptEditController page as an fxml loader so we can pass values
+            CalendarController controller;
+                controller = fxmlLoader.<CalendarController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(currentRepo);
+            Scene scene = new Scene(root); 
             stage=(Stage) ReportCancel.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("Calendar.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            stage.setScene(scene);    
+            stage.show(); 
         }
     }
     

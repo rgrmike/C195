@@ -333,17 +333,21 @@ public class CalendarController implements Initializable {
 
     @FXML
     private void CalendarsReportsButtonHandler(ActionEvent event) throws IOException {
-        //open the calendar page
-            //get reference to the button's stage         
-            Stage stage; 
-            Parent root;
+            
+            //open the Reports form and pass repo to it
+            //we don't need it - but we do need it passed back so we don't throw a null pointer exception
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Reports.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the ApptEditController page as an fxml loader so we can pass values
+            ReportsController controller;
+                controller = fxmlLoader.<ReportsController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(currentRepo);
+            Scene scene = new Scene(root); 
             stage=(Stage) CalendarsReportsButton.getScene().getWindow();
-            //load up OTHER FXML document
-            root = FXMLLoader.load(getClass().getResource("Reports.fxml"));
-            //create a new scene with root and set the stage
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            stage.setScene(scene);    
+            stage.show();  
     }
     
     private void populateCustomer(){

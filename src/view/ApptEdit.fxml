@@ -37,7 +37,7 @@
       </Label>
       <ComboBox fx:id="ApptEditLocation" layoutX="145.0" layoutY="336.0" onAction="#ApptEditLocationHandler" prefWidth="150.0" />
       <Label layoutX="27.0" layoutY="340.0" text="Location" />
-      <ComboBox fx:id="ApptEditContact" layoutX="144.0" layoutY="371.0" onAction="#ApptEditContactHandler" prefWidth="150.0" />
+      <ComboBox fx:id="ApptEditContact" layoutX="144.0" layoutY="371.0" onAction="#ApptEditContactHandler" prefWidth="150.0" promptText="Select Contact" />
       <Label layoutX="25.0" layoutY="375.0" text="Contact" />
    </children>
 </AnchorPane>
