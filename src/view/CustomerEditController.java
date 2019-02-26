@@ -86,8 +86,19 @@ public class CustomerEditController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-        // Populate custList
+        initTable();
+        CustomerEditCustNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        CustomerEditCustIDCol.setCellValueFactory(new PropertyValueFactory<>("customerId"));
+        CustomerEditCustomerTable.getItems().setAll(custList);
+        CustomerEditCityIDCol.setCellValueFactory(new PropertyValueFactory<>("cityId"));
+        CustomerEditCityCol.setCellValueFactory(new PropertyValueFactory<>("city"));
+        CustomerEditCityTable.getItems().setAll(cityList);
+        CustomerEditCityTable.getSelectionModel().select(0);
+
+    }
+    
+    public void initTable(){
+                // Populate custList
         try {
             DBConnection.makeConnection();
             String sqlStatement = "SELECT c.customerId, c.customerName, a.addressId, a.address, a.address2, a.cityId, y.city, t.country, a.postalCode, a.phone FROM customer c INNER JOIN address a ON c.addressID = a.addressID JOIN city y ON y.cityId = a.cityId JOIN country t ON y.countryId = t.countryId";
@@ -126,14 +137,9 @@ public class CustomerEditController implements Initializable {
             System.out.println("Code Barfed " + ex.getMessage());
         }
 
-        CustomerEditCustNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        CustomerEditCustIDCol.setCellValueFactory(new PropertyValueFactory<>("customerId"));
-        CustomerEditCustomerTable.getItems().setAll(custList);
-        CustomerEditCityIDCol.setCellValueFactory(new PropertyValueFactory<>("cityId"));
-        CustomerEditCityCol.setCellValueFactory(new PropertyValueFactory<>("city"));
-        CustomerEditCityTable.getItems().setAll(cityList);
+        
     }
-
+    
     public void setRepo(Repo moveRepo){
         this.currentRepo = moveRepo;
     }
@@ -237,17 +243,17 @@ public class CustomerEditController implements Initializable {
                     Integer nextCustomerId = 0;
                     Integer nextAddressId = 0;
                     DBConnection.makeConnection();
-                    String sqlStatementOne = "SELECT MAX(customerId) FROM customer ";
+                    String sqlStatementOne = "SELECT MAX(customerId)  as customerId FROM customer ";
                     Query.makeQuery(sqlStatementOne);
                     ResultSet resultOne = Query.getResult();
                     while(resultOne.next()){
                         nextCustomerId = (resultOne.getInt("customerId") + 1);
                     }
-                    String sqlStatementTwo = "SELECT MAX(addressId) FROM address ";
+                    String sqlStatementTwo = "SELECT MAX(addressId) as addressId FROM address ";
                     Query.makeQuery(sqlStatementTwo);
                     ResultSet resultTwo = Query.getResult();
                     while(resultTwo.next()){
-                        nextAddressId = (resultOne.getInt("addressId") + 1);
+                        nextAddressId = (resultTwo.getInt("addressId") + 1);
                     }
 
                     String sqlStatementThree ="INSERT INTO address (addressId, address, address2, cityId, postalCode, phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES ("+ nextAddressId +", '"+ fromCustAddr +"', '" + fromCustAddr2 +"', " + fromCustCityId.toString() +", '" + fromCustZip +"', '" + fromCustPhone +"', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() +"')";
@@ -265,6 +271,7 @@ public class CustomerEditController implements Initializable {
             }
             //after saving close the form and go back to calendar
             //make sure we pass repo back to the calendar form           
+            //make sure we pass repo back to the calendar form           
             Stage stage;
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
             Parent root = (Parent)fxmlLoader.load();          
@@ -277,6 +284,7 @@ public class CustomerEditController implements Initializable {
             stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
             stage.setScene(scene);    
             stage.show(); 
+            
         } else {
             //if errors on the form are found then report what they are
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -300,12 +308,23 @@ public class CustomerEditController implements Initializable {
             try{
                 DBConnection.makeConnection();
             //Create Statement object
-            String sqlStatementOne = "DELETE address.* FROM address WHERE address.addressId = " + selCustomer.getAddressId().toString();
+            String sqlStatementOne = "DELETE customer, address FROM  customer, address WHERE address.addressId = " + selCustomer.getAddressId().toString() + " AND customer.customerId = " + selCustomer.getCustomerId().toString();
             Query.makeQuery(sqlStatementOne);
-            String sqlStatement ="DELETE customer.* FROM appointment WHERE customer.customerId = " + selCustomer.getCustomerId().toString();
-            Query.makeQuery(sqlStatement);
-                
+                            
         DBConnection.closeConnection();
+        //make sure we pass repo back to the calendar form           
+            Stage stage;
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Calendar.fxml"));     
+            Parent root = (Parent)fxmlLoader.load();          
+            //initialize the ApptEditController page as an fxml loader so we can pass values
+            CalendarController controller;
+                controller = fxmlLoader.<CalendarController>getController();
+            //send the repo class to CalendarController
+            controller.setRepo(currentRepo);
+            Scene scene = new Scene(root); 
+            stage=(Stage) CustomerEditCancelButton.getScene().getWindow();
+            stage.setScene(scene);    
+            stage.show(); 
         } catch (SQLException sqe){
             //Show SQL connection messages
             System.out.println("Error: " + sqe.getMessage());

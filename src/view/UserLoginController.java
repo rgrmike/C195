@@ -85,16 +85,17 @@ public class UserLoginController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+        System.out.println(myLocale.getLanguage());
+        System.out.println(myLocale.getDisplayLanguage());
         //set all form buttons to spanish or russian based on local
-        if (myLocale.getLanguage().equals("Russian")){
+        if (myLocale.getLanguage().equals("ru")){
                 //Translate buttons to russian
                 UserLoginTitleLabel.setText("ЗаПланировать логин");
                 UserLoginUserNameLabel.setText("Имя пользователя:");
                 UserLoginPasswordLabel.setText("Пароль:");
                 UserLoginSigninButton.setText("Войти");
                 UserLoginExitButton.setText("Exit");
-            } else if(myLocale.getLanguage().equals("Spanish")){
+            } else if(myLocale.getLanguage().equals("es")){
                 //translate buttons to spanish
                 UserLoginTitleLabel.setText("Programar inicio de sesión");
                 UserLoginUserNameLabel.setText("Nombre de usuario:");
@@ -207,10 +208,10 @@ public class UserLoginController implements Initializable {
         if (dbUserName == null){
             //set the login box to not found
             //Check for Russian or English and default to english
-            if (myLocale.getLanguage().equals("Russian")){
+            if (myLocale.getLanguage().equals("ru")){
                 //Translate error to Russian
                 UserLoginErrorLabel.setText("Пользователя " + localUserName + " не найден");
-            } else if(myLocale.getLanguage().equals("Spanish")){
+            } else if(myLocale.getLanguage().equals("es")){
                 UserLoginErrorLabel.setText("Usuario: " + localUserName + " No encontrado");
             } else {
                 UserLoginErrorLabel.setText("User: " + localUserName + " Not Found");
@@ -220,10 +221,10 @@ public class UserLoginController implements Initializable {
             //check to see if the password matches what is in the database        
             if (localUserPW.equals(dbUserPw)){
                 //Set the error box to welcome
-                if (myLocale.getLanguage().equals("Russian")){
+                if (myLocale.getLanguage().equals("ru")){
                 //Translate error to Russian
                     UserLoginErrorLabel.setText("Приветствовать!");
-                } else if(myLocale.getLanguage().equals("Spanish")){
+                } else if(myLocale.getLanguage().equals("es")){
                     UserLoginErrorLabel.setText("Bienvenido!");
                 } else {
                     UserLoginErrorLabel.setText("Welcome!");
@@ -250,11 +251,11 @@ public class UserLoginController implements Initializable {
             
             } else {
                 //bad password - set the error box to bad password
-                if (myLocale.getLanguage().equals("Russian")){
+                if (myLocale.getLanguage().equals("ru")){
                     //Translate error to Russian
                     UserLoginErrorLabel.setText("Неверный пароль");
-                } else if(myLocale.getLanguage().equals("English")){
-                    UserLoginErrorLabel.setText("Password Incorrect");
+                } else if(myLocale.getLanguage().equals("es")){
+                    UserLoginErrorLabel.setText("Contraseña incorrecta");
                 } else {
                     UserLoginErrorLabel.setText("Password Incorrect");
                 }

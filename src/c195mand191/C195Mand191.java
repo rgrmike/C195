@@ -6,6 +6,7 @@
 package c195mand191;
 
 
+import java.util.Locale;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,10 +24,6 @@ public class C195Mand191 extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        //change back to userlogin
-        //Parent root = FXMLLoader.load(getClass().getResource("/view/UserLogin.fxml"));
-        
-        //for testing pages
         Parent root = FXMLLoader.load(getClass().getResource("/view/UserLogin.fxml"));
         Scene scene = new Scene(root);
         
@@ -40,7 +37,8 @@ public class C195Mand191 extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args){
-        
+        //for testing - set Locale to Spanish es
+        //Locale.setDefault(new Locale("es"));
         launch(args);
     }
     
