@@ -99,7 +99,7 @@ public class ApptEditController implements Initializable {
         ApptEditTypeCombo.setItems(apptTypeList);
         ApptEditContact.setItems(apptUserList);
         ApptEditTypeCombo.getSelectionModel().select(0);
-        apptLocationList.addAll("New York, NewYork", "Phoenix, Arizona", "London, England", "Online");
+        apptLocationList.addAll("New York, New York", "Phoenix, Arizona", "London, England", "Online");
         ApptEditLocation.setItems(apptLocationList);
         //prevent user from entering meeting outside business hours
         ApptEditLocation.getSelectionModel().select(0);
@@ -109,6 +109,7 @@ public class ApptEditController implements Initializable {
         apptEndList.addAll("09:00:00","10:00:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00");
         ApptEditEnd.setItems(apptEndList);
         ApptEditEnd.getSelectionModel().select(0);
+        ApptEditCustTable.getSelectionModel().select(0);
         //wait for the form to fully load before trying to check the repo class to prevent null pointer exception
         Platform.runLater(() -> {
         if(currentRepo.getrepoIsEdit()==true){
@@ -181,7 +182,8 @@ public class ApptEditController implements Initializable {
     private void ApptEditSaveHandler(ActionEvent event) throws IOException {
         //grab the values from the form
         String errorMsg = "";
-        String dbUpdateCustId = ApptEditCustTable.getSelectionModel().getSelectedItem().getCustomerId().toString();
+        String dbUpdateCustId;
+        dbUpdateCustId = ApptEditCustTable.getSelectionModel().getSelectedItem().getCustomerId().toString();
         String dbUpdateTitle = ApptEditTypeField.getText();
         String dbUpdateDesc = ApptEditTypeCombo.getValue();
         String dbUpdateContact = ApptEditContact.getValue();
@@ -206,16 +208,15 @@ public class ApptEditController implements Initializable {
         //if the error is blank then run the Save code
          if (errorMsg == ""){
             //figure out which location the appt is from
-             switch(dbUpdateLocation){
-                        case "New York, New York":
-                        saveLocationHolder = ZoneId.of("US/Eastern");
-                        case "Online":
-                        saveLocationHolder = ZoneId.of("US/Eastern");
-                        case "Phoenix, Arizona":
-                        saveLocationHolder = ZoneId.of("US/Arizona");
-                        case "London, England":
-                        saveLocationHolder = ZoneId.of("Europe/London");
-                    }
+            if (dbUpdateLocation.equals("New York, New York")){
+                    saveLocationHolder = ZoneId.of("US/Eastern");
+                } else if (dbUpdateLocation.equals("Online")){
+                    saveLocationHolder = ZoneId.of("US/Eastern");
+                } else if (dbUpdateLocation.equals("Phoenix, Arizona")){
+                    saveLocationHolder = ZoneId.of("US/Arizona");
+                } else if (dbUpdateLocation.equals("London, England")){
+                    saveLocationHolder = ZoneId.of("Europe/London");
+                }
             //get the time from the combo box and convert it to local time
             //create a zoned date time entry as a local time zone and convert the local time to the time zone of where the appointment is
             ZonedDateTime dbUpdateZOneStart = ZonedDateTime.of(dbUpdateDate, dbUpdateStartTime, saveLocationZone).withZoneSameInstant(saveLocationHolder);
@@ -226,8 +227,7 @@ public class ApptEditController implements Initializable {
             Timestamp transferEnd = Timestamp.valueOf(dbUpdateZOneEnd.toLocalDateTime());
             String dbUStart = transferStart.toString();
             String dbUEnd = transferEnd.toString();
-            //convert the apptID to a string for and update
-            String dbApptId = editApptId.toString();
+            
             //check to see if there is a conflict for our appointment
             if (checkConflict(dbUStart, dbUEnd) == true) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -237,10 +237,13 @@ public class ApptEditController implements Initializable {
             } else {
                 //If all error conditions are ok then go ahead and update the database
                 if(currentRepo.getrepoIsEdit()==true){
+                    System.out.println("Executing appointment edit save.");
+                    //convert the apptID to a string for and update
+                    String dbApptId = editApptId.toString();
                     //if isEdit is true then we are updating an existing record
                     try {
                         DBConnection.makeConnection();
-                        String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , title = '" + dbUpdateTitle + "', description = '" + dbUpdateDesc + "', location = '" + dbUpdateLocation + "', contact = '"+ dbUpdateContact +"',start = '"+ dbUStart +"', end = '"+ dbUEnd +"', lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy ='" + currentRepo.getrepoUserName() + "' WHERE appointmentId = " + dbApptId;
+                        String sqlStatement = "UPDATE appointment SET customerId = " + dbUpdateCustId + " , userid = " + currentRepo.getrepoUserId().toString() +", title = '" + dbUpdateTitle + "', description = '" + dbUpdateDesc + "', location = '" + dbUpdateLocation + "', contact = '"+ dbUpdateContact +"',start = '"+ dbUStart +"', end = '"+ dbUEnd +"', lastUpdate = CURRENT_TIMESTAMP, lastUpdateBy ='" + currentRepo.getrepoUserName() + "' WHERE appointmentId = " + dbApptId;
                         Query.makeQuery(sqlStatement);
                         ResultSet result = Query.getResult();
                         System.out.println(result);
@@ -265,22 +268,27 @@ public class ApptEditController implements Initializable {
                     stage=(Stage) ApptEditCancel.getScene().getWindow();
                     stage.setScene(scene);    
                     stage.show(); 
-                }else{
+                }else if (currentRepo.getrepoIsEdit()==false){
+                    System.out.println("Executing new appointment save.");
                     //this is a new appointment so we are going to insert it into the apppointments table
                     //first grab the last appointmentId from the database
                     try {
                         DBConnection.makeConnection();
-                        String sqlStatement = "SELECT MAX(appointmentId) FROM appointment";
+                        String sqlStatement = "SELECT MAX(appointmentId) as appointmentId FROM appointment";
                         Query.makeQuery(sqlStatement);
                         ResultSet result = Query.getResult();
                         while(result.next()){
                         Integer dbMaxApptId = result.getInt("appointmentId");
                         //increment the appointmentId by 1
                         newMaxApptId = dbMaxApptId +1;
+                        System.out.println("New Appointment ID: " + newMaxApptId );
+                        }
                         //replace admin with user from user class
-                        String sqlStatementtwo = "INSERT INTO appointment appointmentId, customerId, title, description, location, contact, start, end, createDate, createdBy, lastUpdate, lastUpdateBy VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", '" + dbUpdateTitle + "', '" + dbUpdateDesc + "', '" + dbUpdateLocation + "', '" + dbUpdateContact + "', '" + dbUStart + "', '" + dbUEnd + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() +"')";
+                        String sqlStatementtwo = "INSERT INTO appointment (appointmentId,customerId,userid,title,description,location,contact,type,url,start,end,createDate,createdBy,lastUpdate,lastUpdateBy) VALUES (" + newMaxApptId.toString() +", " +dbUpdateCustId +", " + currentRepo.getrepoUserId().toString()+ ", '" + dbUpdateTitle + "', '" + dbUpdateDesc + "', '" + dbUpdateLocation + "', '" + dbUpdateContact + "', 'URL/NA', 'Type/NA', '" + dbUStart + "', '" + dbUEnd + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() + "', CURRENT_TIMESTAMP,'" + currentRepo.getrepoUserName() +"')";
                         Query.makeQuery(sqlStatementtwo);
                         ResultSet resulttwo = Query.getResult();
+                        while(resulttwo.next()){
+                            System.out.println("New Appointment result: " + resulttwo.toString());
                         }
                     DBConnection.closeConnection();
                     } catch (SQLException sqe){

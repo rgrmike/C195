@@ -10,6 +10,9 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -122,29 +125,31 @@ public class CalendarController implements Initializable {
                 String dbApptTitle = result.getString("appointment.title");
                 String dbApptLocation = result.getString("appointment.location");
                 //Based on the meeting location generate the time zone ID
-                switch(dbApptLocation){
-                    case "New York, New York":
+                if (dbApptLocation.equals("New York, New York")){
                     locationHolder = ZoneId.of("US/Eastern");
-                    case "Online":
+                } else if (dbApptLocation.equals("Online")){
                     locationHolder = ZoneId.of("US/Eastern");
-                    case "Phoenix, Arizona":
+                } else if (dbApptLocation.equals("Phoenix, Arizona")){
                     locationHolder = ZoneId.of("US/Arizona");
-                    case "London, England":
+                } else if (dbApptLocation.equals("London, England")){
                     locationHolder = ZoneId.of("Europe/London");
-                
                 }
-                //grab the start time as a timestamp
+                //grab the start time as a string
+                String dbStartTimeStr = result.getString("appointment.start");
+                //Create a formatter that matches SQL
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                //parse the db string into a local date time object
+                LocalDateTime tempDateTimeStart = LocalDateTime.parse(dbStartTimeStr, formatter);
+                //Tell the ZonedDateTime that the time from the Db is in the time zone where the meeting is
                 //Using zoneddatetime atuomatically adjusts for daylight savings
-                Timestamp localApptStart = result.getTimestamp("appointment.start");
-                //set the tsStart to the location zoned time
-                ZonedDateTime localZoneApptStart = ZonedDateTime.ofInstant(localApptStart.toInstant(), locationHolder);
+                ZonedDateTime localZoneApptStart = tempDateTimeStart.atZone(locationHolder);
                 //now convert the ZonedDateTime to the local time zone
                 ZonedDateTime transitStartTime = localZoneApptStart.withZoneSameInstant(myLocationZone);
                 //Convert the local time zone to a string to store in 
                 String dbApptStart = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitStartTime);
-                //Grab the appt end - convert to local time zone and string
-                Timestamp localApptEnd = result.getTimestamp("appointment.end");
-                ZonedDateTime localZoneApptEnd = ZonedDateTime.ofInstant(localApptEnd.toInstant(), locationHolder);
+                String dbEndTimeStr = result.getString("appointment.end");
+                LocalDateTime tempDateTimeEnd = LocalDateTime.parse(dbEndTimeStr, formatter);
+                ZonedDateTime localZoneApptEnd = tempDateTimeEnd.atZone(locationHolder);
                 ZonedDateTime transitEndTime = localZoneApptEnd.withZoneSameInstant(myLocationZone);
                 String dbApptEnd = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitEndTime);
                 String dbApptContact = result.getString("appointment.contact");

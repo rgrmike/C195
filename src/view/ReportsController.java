@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -139,12 +140,36 @@ public class ReportsController implements Initializable {
                     case "London, England":
                     locationHolder = ZoneId.of("Europe/London");
                 }
-                Timestamp localApptStart = r2.getTimestamp("appointment.start");
-                ZonedDateTime localZoneApptStart = ZonedDateTime.ofInstant(localApptStart.toInstant(), locationHolder);
+                /*
+                //grab the start time as a string
+                String dbStartTimeStr = result.getString("appointment.start");
+                //Create a formatter that matches SQL
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                //parse the db string into a local date time object
+                LocalDateTime tempDateTimeStart = LocalDateTime.parse(dbStartTimeStr, formatter);
+                //Tell the ZonedDateTime that the time from the Db is in the time zone where the meeting is
+                //Using zoneddatetime atuomatically adjusts for daylight savings
+                ZonedDateTime localZoneApptStart = tempDateTimeStart.atZone(locationHolder);
+                //now convert the ZonedDateTime to the local time zone
+                ZonedDateTime transitStartTime = localZoneApptStart.withZoneSameInstant(myLocationZone);
+                //Convert the local time zone to a string to store in 
+                String dbApptStart = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitStartTime);
+                String dbEndTimeStr = result.getString("appointment.end");
+                LocalDateTime tempDateTimeEnd = LocalDateTime.parse(dbEndTimeStr, formatter);
+                ZonedDateTime localZoneApptEnd = tempDateTimeEnd.atZone(locationHolder);
+                ZonedDateTime transitEndTime = localZoneApptEnd.withZoneSameInstant(myLocationZone);
+                String dbApptEnd = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitEndTime);
+                */
+                
+                String localApptStartStr = r2.getString("appointment.start");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime localApptStart = LocalDateTime.parse(localApptStartStr, formatter);
+                ZonedDateTime localZoneApptStart = localApptStart.atZone(locationHolder);
                 ZonedDateTime transitStartTime = localZoneApptStart.withZoneSameInstant(myLocationZone);
                 String dbApptStart = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitStartTime);
-                Timestamp localApptEnd = r2.getTimestamp("appointment.end");
-                ZonedDateTime localZoneApptEnd = ZonedDateTime.ofInstant(localApptEnd.toInstant(), locationHolder);
+                String localApptEndStr = r2.getString("appointment.end");
+                LocalDateTime tempDateTimeEnd = LocalDateTime.parse(localApptEndStr, formatter);
+                ZonedDateTime localZoneApptEnd = tempDateTimeEnd.atZone(locationHolder);
                 ZonedDateTime transitEndTime = localZoneApptEnd.withZoneSameInstant(myLocationZone);
                 String dbApptEnd = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(transitEndTime);
                 String dbApptContact = r2.getString("appointment.contact");
