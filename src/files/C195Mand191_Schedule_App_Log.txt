@@ -228,3 +228,9 @@ User: user1 Logged in at: 2019-02-27T16:56:03.374-08:00[America/Los_Angeles]
 User: user1 Logged in at: 2019-02-27T16:59:13.473-08:00[America/Los_Angeles]
 
 User: user1 Logged in at: 2019-02-27T18:00:37.294-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-28T13:23:40.253-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-28T14:47:49.038-08:00[America/Los_Angeles]
+
+User: user1 Logged in at: 2019-02-28T14:55:44.794-08:00[America/Los_Angeles]

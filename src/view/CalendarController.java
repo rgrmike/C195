@@ -112,6 +112,7 @@ public class CalendarController implements Initializable {
     
     private void TableFill() {
         try {
+            appointmentList.clear();
             DBConnection.makeConnection();
             //Create Statement object
             String sqlStatement = "SELECT appointment.title, appointment.location, appointment.start, appointment.end, appointment.contact, appointment.customerID, customer.customerName, appointment.description, appointment.appointmentID FROM appointment INNER JOIN customer ON appointment.customerId=customer.customerId";
@@ -170,6 +171,7 @@ public class CalendarController implements Initializable {
         }
         
         //PropertyValueFactory uses the class initilization variables to populate the table
+        CalendarTable.getItems().clear();
         CalendarApptCol.setCellValueFactory(new PropertyValueFactory<>("appointmentTitle"));
         CalendarStartCol.setCellValueFactory(new PropertyValueFactory<>("start"));
         CalendarEndCol.setCellValueFactory(new PropertyValueFactory<>("end"));
